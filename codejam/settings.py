@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'coding',
     'codejamlogin',
-    'dashboard'
+    'dashboard',
+    'codetests'
 ]
 
 MIDDLEWARE_CLASSES = [

@@ -15,16 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.conf.urls import url, include
-from codejamlogin import views as codejamloginviews
-import os
-os.environ['TZ']="asia/kolkata"
-
+from codetests import views
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^test/', include('coding.urls')),
-    url(r'^tests/', include('codetests.urls')),
-    url(r'^login/', codejamloginviews.login),
-    url(r'^dashboard/',include('dashboard.urls')),
-    url(r'^$', codejamloginviews.login),
+    url(r'^show/', views.show),
 ]

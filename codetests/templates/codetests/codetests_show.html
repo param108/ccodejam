@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<script type="text/javascript">
+var urlmap = { 
+{% for a in btns %}
+ "{{a.name}}": "{{a.url}}",
+{% endfor %}
+"none": '{{base_url}}'};
+console.log(urlmap);
+function action_clicked(event) {
+  url = urlmap[$(event).text()];
+  console.log("URL:"+url);
+  window.location=url; 
+}
+
+$(document).ready(function() {
+    $("#id_datetimefield").datetimepicker();
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
+</div>
+<h3>Configured Tests</h3>
+<div class="codetests-list">
+<div class="table">
+{% if tests %}
+{% for a in tests %}
+<div class="row">
+<div class="span3">{a.testname}</div>
+<div class="span3">{a.start}</div>
+<div class="span3"><a class="btn btn-info" href="{base_url}/tests/edit?id={a.id}"</div>
+</div>
+{% endfor %}
+{% else %}
+<div>No Tests found</div>
+{% endif %}
+</div>
+</div>
+<h3>Add a New Test</h3>
+<form action="tests/add" method="post">
+{% csrf_token %}
+<div class="codetests-input">
+{{ form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ form.testname.errors }}
+    <label for="{{ form.testname.id_for_label }}">Test Name:</label>
+    {{ form.testname }}
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.datetimefield.errors }}
+    <label for="{{ form.datetimefield.id_for_label }}">Date and Time of the test:</label>
+    {{ form.datetimefield}}
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.duration.errors }}
+    <label for="{{ form.duration.id_for_label }}">Duration of the test (hours):</label>
+    {{ form.duration }}
+</div>
+<input class="btn btn-info fieldSubmit" type="submit" value="Submit" />
+</div>
+</form>
+{% endblock %}
