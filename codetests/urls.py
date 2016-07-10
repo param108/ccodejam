@@ -17,5 +17,6 @@ from django.conf.urls import url
 from django.contrib import admin
 from codetests import views
 urlpatterns = [
-    url(r'^show/', views.show),
+    url(r'^show/', views.show, name="show"),
+    url(r'^edit/(?P<testid>[0-9]+)/', views.edit, name="edit"),
 ]

@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
 <script type="text/javascript">
 $(document).ready(function() {
-    $("#id_datetimefield").datetimepicker({ format:'YYYY-mm-DD hh:ss' });
+    $("#id_datetimefield").datetimepicker({ format:'YYYY-MM-DD hh:ss' });
 });
 </script>
 <style>
@@ -28,7 +28,7 @@ $(document).ready(function() {
 <tr class="row">
 <td>{{a.testname}}</td>
 <td>{{a.start}}</td>
-<td><a class="btn btn-info" href="{base_url}/tests/edit?id={a.id}">Edit</a></td>
+<td><a class="btn btn-primary" href="{{base_url}}/tests/edit/{{a.id}}/">Edit</a></td>
 </tr>
 {% endfor %}
 </table>
@@ -37,7 +37,7 @@ $(document).ready(function() {
 {% endif %}
 </div>
 <h3>Add a New Test</h3>
-<form action="tests/add" method="post">
+<form action="/tests/show/" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}
@@ -58,7 +58,7 @@ $(document).ready(function() {
     <label for="{{ form.duration.id_for_label }}">Duration of the test (hours):</label>
     {{ form.duration }}
 </div>
-<input class="btn btn-info fieldSubmit" type="submit" value="Submit" />
+<input class="btn btn-success fieldSubmit" type="submit" value="Submit" />
 </div>
 </form>
 {% endblock %}
