@@ -25,6 +25,7 @@ class Qns(models.Model):
   # the files need to be uploaded after the first save!!!
   smallscript=models.FileField(upload_to=smallscript_upload, null=True)
   largescript=models.FileField(upload_to=largescript_upload, null=True)
+  difficulty=models.IntegerField(default=1)
   
 def qn_upload(inst, filename):
   return "ans/"+str(inst.user)+"/"+str(inst.qn)+"/"+inst.qtype+"/"+str(inst.attempt)+"/qn.txt"
