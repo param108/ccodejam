@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+    {% load staticfiles %}
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="{% static "login/css/bootstrap.min.css" %}">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="{% static "login/css/bootstrap-theme.min.css" %}">
+    <!-- DatePicker -->
+    <link rel="stylesheet" href="{% static "login/css/bootstrap-datepicker.css" %}">
+
+    <link rel="stylesheet" href="{% static "login/css/base.css" %}" >
+    <link rel="stylesheet" href="{% static "create_user/css/create_user.css" %}" >
+    <style>
+    body {  
+      background-image: url('{% static "login/img/bg.png" %}');
+      background-repeat: repeat;
+    }
+    </style>
+    <!-- Latest compiled and minified JavaScript -->
+    <!-- jquery 1.12.1 -->
+    <script src="{% static "login/js/jquery.min.js" %}"></script>
+    <!-- bootstrap 3.3.6 -->
+    <script src="{% static "login/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "login/js/bootstrap-datepicker.min.js" %}"></script>
+    {% block headext %}{% endblock %}
+    </head>
+    <body>
+    <div>
+    {% block content %}{% endblock %}
+    </div>
+    </body>
+</html>
