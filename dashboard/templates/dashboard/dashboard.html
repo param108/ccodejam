@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block headext %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "dashboard/css/dashboard.css" %}">
+<script type="text/javascript">
+var urlmap = { 
+{% for a in btns %}
+ "{{a.name}}": "{{a.url}}",
+{% endfor %}
+"none": '{{base_url}}'};
+console.log(urlmap);
+function action_clicked(event) {
+  url = urlmap[$(event).text()];
+  console.log("URL:"+url);
+  window.location=url; 
+}
+
+$(document).ready(function() {
+});
+</script>
+<link href="https://fonts.googleapis.com/css?family=Rock+Salt" rel="stylesheet" type="text/css">
+<style>
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">RampUp Dashboard</h2>
+</div>
+<div class="dashboard-details">
+<span><h3>Username: <em>{{ username }}</em></h3></span>
+</div>
+<div class="dashboard-actions">
+<h3>Actions</h3>
+{% for a in btns %}
+  <div class="dashboard-spacing"></div>
+  <div class="dashboard-btn" onclick="action_clicked(this)">{{ a.name }}</div>
+{% endfor %}
+</div>
+{% endblock %}

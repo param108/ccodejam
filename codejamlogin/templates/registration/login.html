@@ -51,10 +51,10 @@ window.open('{{base_url}}/help/show/','_blank');
 
 {% block content %}
 <div class="login">
-<form class="form-signin" method="post" action="{% url 'rampuplogin.views.login' %}">
+<form class="form-signin" method="post" action="{% url 'codejamlogin.views.login' %}">
 {% csrf_token %}
 <div>
-<h3 class="form-signin-heading header">Rampup Login</h2>
+<h3 class="form-signin-heading header">CodeJam Login</h2>
 </div>
 
 {% if errors %}
@@ -72,10 +72,6 @@ window.open('{{base_url}}/help/show/','_blank');
 <div class="username-div form-control">
     <input class="form-control" id="password" type="password" name="password" placeholder="password">
 </div>
-</div>
-<div class="form-group">
-<label class="radio-inline"><input type="radio" name="role" id="user" value="user" checked/>New Recruit Login</label><br/>
-<label class="radio-inline"><input type="radio" name="role" id="admin" value="admin"/>Manager Login</label>
 </div>
 <div class="form-group">
     <input type="submit" class="btn btn-primary btn-block" id="login" value="login" />

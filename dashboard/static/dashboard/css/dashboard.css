@@ -1,0 +1,20 @@
+.dashboard-btn {
+  width:100px;
+  height:100px;
+  border-width: 2px;
+  border-radius: 5px;
+  border-style: solid;
+  display: table-cell;
+  font-size: 14px;
+  color: #ffc;
+  background-color: #417690;
+  vertical-align: middle;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dashboard-spacing {
+  height:100px;
+  display: table-cell;
+  width:10px; 
+}

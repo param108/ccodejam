@@ -128,12 +128,13 @@ AUTHENTICATION_BACKENDS = [
 #    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-MEDIA_URL="/media/"
-BASE_URL=""
+
+BASE_URL="/codejam"
 # For Prod
-# BASE_URL="/codejam"
-LOGIN_REDIRECT_URL = BASE_URL+'login'
-LOGIN_URL=BASE_URL+"login/"
+# BASE_URL="codejam/"
+LOGIN_URL=BASE_URL + "/login/"
+LGIN_REDIRECT_URL=BASE_URL + "/login/"
+
 
 AUTH_LDAP_SERVER_URI = "ldap://ds.cisco.com:389"
 AUTH_LDAP_USER_DN_TEMPLATE = "cn=%(user)s, ou=employees, ou=cisco users, dc=cisco, dc=com"
