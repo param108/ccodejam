@@ -3,20 +3,8 @@
 {% load staticfiles %}
 <link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
 <script type="text/javascript">
-var urlmap = { 
-{% for a in btns %}
- "{{a.name}}": "{{a.url}}",
-{% endfor %}
-"none": '{{base_url}}'};
-console.log(urlmap);
-function action_clicked(event) {
-  url = urlmap[$(event).text()];
-  console.log("URL:"+url);
-  window.location=url; 
-}
-
 $(document).ready(function() {
-    $("#id_datetimefield").datetimepicker();
+    $("#id_datetimefield").datetimepicker({ format:'YYYY-mm-DD hh:ss' });
 });
 </script>
 <style>
@@ -29,19 +17,24 @@ $(document).ready(function() {
 </div>
 <h3>Configured Tests</h3>
 <div class="codetests-list">
-<div class="table">
 {% if tests %}
+<table class="table table-striped">
+<tr class="row">
+<th>Test Name</th>
+<th>Start Time</th>
+<th>Actions</th>
+</tr>
 {% for a in tests %}
-<div class="row">
-<div class="span3">{a.testname}</div>
-<div class="span3">{a.start}</div>
-<div class="span3"><a class="btn btn-info" href="{base_url}/tests/edit?id={a.id}"</div>
-</div>
+<tr class="row">
+<td>{{a.testname}}</td>
+<td>{{a.start}}</td>
+<td><a class="btn btn-info" href="{base_url}/tests/edit?id={a.id}">Edit</a></td>
+</tr>
 {% endfor %}
+</table>
 {% else %}
 <div>No Tests found</div>
 {% endif %}
-</div>
 </div>
 <h3>Add a New Test</h3>
 <form action="tests/add" method="post">

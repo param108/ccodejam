@@ -3,22 +3,27 @@ from django.http import HttpResponse,HttpResponseRedirect,JsonResponse
 from coding.models import Qns
 from forms import CodeTestForm
 from models import CodeTests
+import datetime
+import os,time
+from django.core.urlresolvers import reverse
 # Create your views here.
 def show(request):
+  os.environ['TZ']="Asia/Kolkata"
+  time.tzset()
+  qns = CodeTests.objects.all();
   if request.method == "GET":
-    qns = CodeTests.objects.all();
-    qnform = CodeTestForm() 
+    qnform = CodeTestForm(initial={'datetimefield':datetime.datetime.now()})
     return render(request, "codetests/codetests_show.html",{"form": qnform, "tests": qns})
   qnform = CodeTestForm(request.POST) 
   if qnform.is_valid():
     try:
       newtest = CodeTests(testname = qnform.cleaned_data["testname"],
-                        datetimefield = qnform.cleaned_data["datetimefield"],
+                        start = qnform.cleaned_data["datetimefield"],
                         duration = qnform.cleaned_data["duration"])
       newtest.save()
       return HttpResponseRedirect(reverse("codetests:edit",[newtest.id])) 
-    except:
-      qnform.add_error(None, "Failed to save the test");
+    except Exception,e:
+      qnform.add_error(None, "Failed to save the test"+str(e));
       pass
   return render(request, "codetests/codetests_show.html",{"form": qnform, "tests": qns})
 
