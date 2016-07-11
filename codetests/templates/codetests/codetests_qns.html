@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<script type="text/javascript">
+function confirmdelete() {
+  return confirm("Are you sure you want to delete this test?");
+}
+$(document).ready(function() {
+    $("#id_datetimefield").datetimepicker({ format:'YYYY-MM-DD hh:ss' });
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
+</div>
+<h3>Edit Test</h3>
+<form action="/tests/edit/{{tid}}/" method="post">
+{% csrf_token %}
+<div class="codetests-input">
+{{ form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ form.testname.errors }}
+    <label for="{{ form.testname.id_for_label }}">Test Name:</label>
+    {{ form.testname }}
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.datetimefield.errors }}
+    <label for="{{ form.datetimefield.id_for_label }}">Date and Time of the test:</label>
+    {{ form.datetimefield}}
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.duration.errors }}
+    <label for="{{ form.duration.id_for_label }}">Duration of the test (hours):</label>
+    {{ form.duration }}
+</div>
+<input class="btn btn-success fieldSubmit" type="submit" value="Submit" /><a onClick="return confirmdelete();" class="btn btn-danger deleteButton" href="/tests/delete/{{tid}}/">Delete</a>
+<a class="btn btn-primary qnButton" href="/tests/addqns/{{tid}}/">Add/Edit Questions</a>
+</div>
+</form>
+{% endblock %}

@@ -15,6 +15,18 @@
   margin-left: 20px;
 }
 .fieldSubmit {
-  margin: auto;
-  width:20%
+  margin-top: 10px;
+  display: inline-block;
+  width:100px;
+}
+.deleteButton {
+  margin-top: 10px;
+  display: inline-block;
+  margin-left: 5px;
+  width:100px;
+}
+.qnButton {
+  margin-top: 10px;
+  width: 205px;
+  display: inline-block;
 }
