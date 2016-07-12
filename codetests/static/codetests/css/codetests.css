@@ -1,12 +1,22 @@
 .fieldWrapper {
+  display: block;
   position: relative;
   width:60%;
 }
 
+.fieldWrapper label {
+  display:block;
+}
 .fieldWrapper input {
-  float: right;
+  display: inline-block;
   width: 30%;
 }
+
+.fieldWrapper textarea {
+  display: inline-block;
+  width: 30%;
+}
+
 .codetests-input {
   margin-left: 20px;
 }
@@ -29,4 +39,15 @@
   margin-top: 10px;
   width: 205px;
   display: inline-block;
+}
+
+.fieldWrapper span {
+  display:block;
+}
+#addQuestionBtn {
+  margin-left:10px;
+}
+
+.addQnsH2 {
+  margin-left:10px;
 }

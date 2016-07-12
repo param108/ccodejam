@@ -105,7 +105,7 @@ def addqns(request, testid):
     if codeQnForm.is_valid():
       try:
         qn = save_qn(codeQnForm,thistest, request.FILES)
-        q.save()
+        qn.save()
         idx=CodeQnsList.objects.filter(testid=thistest)
         # add the new entry in the end
         qnentry = CodeQnsList(qn=qn,testid=thistest,seq=len(idx))
@@ -115,7 +115,9 @@ def addqns(request, testid):
         codeQnForm.add_error(None,"Failed to save the form:"+str(e))
         print("Failed to save question:"+str(e))
   qnlist = CodeQnsList.objects.filter(testid=thistest.id)
-  notlist = CodeQnsList.objects.exclude(testid=thistest.id)
+  notlist = Qns.objects.all()
+  for qn in qnlist:
+    notlist = notlist.exclude(pk=qn.qn.id)
   return render(request, "codetests/codetests_qns.html",{ "qnlist": qnlist, "notlist":notlist,
-                                                          "form": codeQnForm })
+                                                          "form": codeQnForm, "tid":thistest.id })
 
