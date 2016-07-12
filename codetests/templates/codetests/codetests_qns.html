@@ -48,6 +48,7 @@ $(document).ready(function() {
 {% block content %}
 <div>
 <h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
+<h2 class="addQnsH2"><b>Test:</b>{{thetest.testname}}</h2>
 </div>
 <h2 class="addQnsH2">Add A New Question</h2>
 <button id="addQuestionBtn" class="btn btn-primary" onClick="return toggleAddQuestion()">Show/Hide New Question Form</button>
@@ -172,7 +173,7 @@ $(document).ready(function() {
 <tr class="row">
 <td>{{qn.id}}</td><td>{{qn.title}}</td><td>{{qn.difficulty}}</td>
 <td><a class="btn btn-success" href="/tests/editqns/{{qn.id}}/">Edit</a>
-    <button class="btn btn-danger" onClick="return addClicked({{qn.id}});">Remove</button>
+    <button class="btn btn-danger" onClick="return addClicked({{qn.id}});">Add to this test</button>
 </td>
 </tr>
 {% endfor %}

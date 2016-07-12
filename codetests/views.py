@@ -125,7 +125,7 @@ def addqns(request, testid):
   notlist = Qns.objects.all()
   for qn in qnlist:
     notlist = notlist.exclude(pk=qn.qn.id)
-  return render(request, "codetests/codetests_qns.html",{ "qnlist": qnlist, "notlist":notlist,
+  return render(request, "codetests/codetests_qns.html",{ "thetest": thistest, "qnlist": qnlist, "notlist":notlist,
                                                           "form": codeQnForm, "tid":thistest.id })
 
 @csrf_exempt
