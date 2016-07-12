@@ -7,6 +7,7 @@ import datetime
 import os,time
 from django.core.urlresolvers import reverse
 from codejam import settings
+from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 def show(request):
   os.environ['TZ']="Asia/Kolkata"
@@ -66,7 +67,7 @@ def edit(request,testid):
     thistest.duration = tform.cleaned_data["duration"]
     try:
       thistest.save()
-      return HttpResponseRedirect(reverse("tests:edit",[thistest.id])) 
+      return HttpResponseRedirect(reverse("tests:edit",args=[thistest.id])) 
     except:
       pass
   
@@ -76,18 +77,18 @@ def edit(request,testid):
 def _fg(t,k):
   return t.cleaned_data[k] 
 
-def saveqn(qnform, t, rfiles):
-  qn=Qns(title=_fg(t,"title"),
-         description=_fg(t,"description"),
-         smalllimits=_fg(t,"smalllimits"),
-         largelimits=_fg(t,"largelimits"),
-         inputexample=_fg(t,"inputexample"),
-         outputexample=_fg(t,"outputexample"),
-         utimesmall=_fg(t,"utimesmall"),
-         utimelarge=_fg(t,"utimelarge"),
-         smallscript=rfiles["smallscript"],
-         largescript=rfiles["largescript"],
-         difficulty=_fg(t,"difficulty"))
+def save_qn(qnform):
+  qn=Qns(title=_fg(qnform,"title"),
+         description=_fg(qnform,"description"),
+         smalllimits=_fg(qnform,"smalllimits"),
+         largelimits=_fg(qnform,"largelimits"),
+         inputexample=_fg(qnform,"inputexample"),
+         outputexample=_fg(qnform,"outputexample"),
+         utimesmall=_fg(qnform,"utimesmall"),
+         utimelarge=_fg(qnform,"utimelarge"),
+         #smallscript=rfiles["smallscript"],
+         #largescript=rfiles["largescript"],
+         difficulty=_fg(qnform,"difficulty"))
   return qn;
            
 def addqns(request, testid):
@@ -104,20 +105,73 @@ def addqns(request, testid):
     codeQnForm = CodeQnForm(request.POST, request.FILES)
     if codeQnForm.is_valid():
       try:
-        qn = save_qn(codeQnForm,thistest, request.FILES)
+        qn = save_qn(codeQnForm)
         qn.save()
-        idx=CodeQnsList.objects.filter(testid=thistest)
+        qn.smallscript=request.FILES["smallscript"]
+        qn.largescript=request.FILES["largescript"]
+        qn.save()
+        idx=CodeQnsList.objects.filter(testid=thistest).count()
         # add the new entry in the end
-        qnentry = CodeQnsList(qn=qn,testid=thistest,seq=len(idx))
+        qnentry = CodeQnsList(qn=qn,testid=thistest,seq=idx)
         qnentry.save()
-        return HttpResponseRedirect(reverse("tests:addqns",[thistest.id])) 
+        return HttpResponseRedirect(reverse("tests:addqns",args=[thistest.id])) 
       except Exception,e:
         codeQnForm.add_error(None,"Failed to save the form:"+str(e))
         print("Failed to save question:"+str(e))
+    else:
+      print "QnForm failed"
+      codeQnForm.add_error(None,"Form Has Errors"+str(e))
   qnlist = CodeQnsList.objects.filter(testid=thistest.id)
   notlist = Qns.objects.all()
   for qn in qnlist:
     notlist = notlist.exclude(pk=qn.qn.id)
   return render(request, "codetests/codetests_qns.html",{ "qnlist": qnlist, "notlist":notlist,
                                                           "form": codeQnForm, "tid":thistest.id })
+
+@csrf_exempt
+def linkqn(request, testid):
+  if int(testid) < 0:
+    return HttpResponseRedirect(reverse("tests:show")) 
+  thistest = None
+  try:
+    thistest = CodeTests.objects.get(pk=int(testid))
+  except:
+    return JsonResponse({"success":-1}) 
+  qnid=0
+  qn = None
+  try:
+    qnid = int(request.POST.get("qn"))
+    qn = Qns.objects.get(pk=qnid)
+  except:
+    return JsonResponse({"success":-1}) 
+
+  try:
+    seq = CodeQnsList.objects.filter(testid=thistest).count()
+    cqe = CodeQnsList(testid=thistest,qn=qn, seq=seq)
+    cqe.save()
+    return JsonResponse({"success":0}) 
+  except:
+    return JsonResponse({"success":-1}) 
+
+@csrf_exempt
+def unlinkqn(request, testid):
+  if int(testid) < 0:
+    return HttpResponseRedirect(reverse("tests:show")) 
+  thistest = None
+  try:
+    thistest = CodeTests.objects.get(pk=int(testid))
+  except:
+    return JsonResponse({"success":-1}) 
+  qnid=0
+  qn = None
+  try:
+    qnid = int(request.POST.get("qn"))
+    qn = Qns.objects.get(pk=qnid)
+  except:
+    return JsonResponse({"success":-1}) 
+  try:
+    CodeQnsList.objects.filter(testid=thistest).filter(qn=qn).delete()
+    return JsonResponse({"success":0}) 
+  except:
+    return JsonResponse({"success":-1}) 
 

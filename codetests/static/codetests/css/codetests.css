@@ -47,6 +47,42 @@
 #addQuestionBtn {
   margin-left:10px;
 }
+#chosenQuestionsBtn {
+  margin-left:10px;
+}
+#chosenQuestions {
+  margin-left:20px;
+}
+
+#chosenQuestions span{
+  margin-left:5px;
+}
+
+#chosenQuestions button{
+  margin:5px;
+}
+
+#chosenQuestions a{
+  margin:5px;
+}
+
+#availableQuestions {
+  margin-left:20px;
+}
+
+#availableQuestions span{
+  margin-left:5px;
+}
+
+#availableQuestions button{
+  margin:5px;
+}
+
+#availableQuestions a{
+  margin:5px;
+}
+
+
 
 .addQnsH2 {
   margin-left:10px;

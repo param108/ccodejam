@@ -21,4 +21,6 @@ urlpatterns = [
     url(r'^edit/(?P<testid>[0-9]+)/', views.edit, name="edit"),
     url(r'^delete/(?P<testid>[0-9]+)/', views.delete, name="delete"),
     url(r'^addqns/(?P<testid>[0-9]+)/', views.addqns, name="addqns"),
+    url(r'^linkqn/(?P<testid>[0-9]+)/', views.linkqn),
+    url(r'^unlinkqn/(?P<testid>[0-9]+)/', views.unlinkqn),
 ]

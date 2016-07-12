@@ -9,6 +9,37 @@
 function toggleAddQuestion() {
   $("#addQuestion").toggle();
 }
+function toggleChosenQuestions() {
+  $("#chosenQuestions").toggle();
+}
+function addClicked(qnid) {
+  $.ajax({url:"/tests/linkqn/{{tid}}/",
+          method:"post",
+          data: {qn: qnid},
+          success: function(data) {
+            if (data.success == 0) {
+              location.reload();
+            } else {
+              if (confirm("Something went wrong, click ok to reload the page")) {
+                location.reload();
+              }
+            }
+          }}); 
+}
+function removeClicked(qnid) {
+  $.ajax({url:"/tests/unlinkqn/{{tid}}/",
+          method:"post",
+          data: {qn: qnid},
+          success: function(data) {
+            if (data.success == 0) {
+              location.reload();
+            } else {
+              if (confirm("Something went wrong, click ok to reload the page")) {
+                location.reload();
+              }
+            }
+          }}); 
+}
 $(document).ready(function() {
 
 });
@@ -19,9 +50,9 @@ $(document).ready(function() {
 <h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
 </div>
 <h2 class="addQnsH2">Add A New Question</h2>
-<button id="addQuestionBtn" class="btn btn-primary" onClick="return toggleAddQuestion()">Add a new Question</button>
-<div id="addQuestion" class="initiallyHidden">
-<form action="/tests/addqns/{{tid}}/" method="post">
+<button id="addQuestionBtn" class="btn btn-primary" onClick="return toggleAddQuestion()">Show/Hide New Question Form</button>
+<div id="addQuestion" >
+<form action="/tests/addqns/{{tid}}/" enctype="multipart/form-data" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}
@@ -107,4 +138,47 @@ $(document).ready(function() {
 </form>
 </div>
 <h2 class="addQnsH2">Choose From Existing Questions</h2>
+<button id="chosenQuestionsBtn" class="btn btn-primary" onClick="return toggleChosenQuestions()">Show/Hide Chosen Questions</button>
+<div id="chosenQuestions" >
+<h3>Chosen Questions</h3>
+{% if not qnlist %}
+<span> No Questions Chosen Yet</span>
+{% else %}
+<table class="table table-striped">
+<tr class="row">
+<th>Question Number</th> <th>Title</th> <th>Difficulty</th> <th>Actions</th>
+</tr>
+{% for qn in qnlist %}
+<tr class="row">
+<td>{{qn.qn.id}}</td><td>{{qn.qn.title}}</td><td>{{qn.qn.difficulty}}</td>
+<td><a class="btn btn-success" href="/tests/editqns/{{qn.qn.id}}/">Edit</a>
+    <button class="btn btn-danger" onClick="return removeClicked({{qn.qn.id}});">Remove</button>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+</div>
+<div id="availableQuestions">
+<h3>Available Questions</h3>
+{% if not notlist %}
+<span> No Questions Available Yet (why dont you add one?)</span>
+{% else %}
+<table class="table table-striped">
+<tr class="row">
+<th>Question Number</th> <th>Title</th> <th>Difficulty</th> <th>Actions</th>
+</tr>
+{% for qn in notlist %}
+<tr class="row">
+<td>{{qn.id}}</td><td>{{qn.title}}</td><td>{{qn.difficulty}}</td>
+<td><a class="btn btn-success" href="/tests/editqns/{{qn.id}}/">Edit</a>
+    <button class="btn btn-danger" onClick="return addClicked({{qn.id}});">Remove</button>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+</div>
+
+
 {% endblock %}
