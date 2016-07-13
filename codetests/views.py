@@ -76,7 +76,20 @@ def edit(request,testid):
 # _f_orm _g_et
 def _fg(t,k):
   return t.cleaned_data[k] 
-
+def update_qn(qn, qnform):
+  qn.title=_fg(qnform,"title")
+  qn.description=_fg(qnform,"description")
+  qn.smalllimits=_fg(qnform,"smalllimits")
+  qn.largelimits=_fg(qnform,"largelimits")
+  qn.inputexample=_fg(qnform,"inputexample")
+  qn.outputexample=_fg(qnform,"outputexample")
+  qn.utimesmall=_fg(qnform,"utimesmall")
+  qn.utimelarge=_fg(qnform,"utimelarge")
+         #smallscript=rfiles["smallscript"],
+         #largescript=rfiles["largescript"],
+  qn.difficulty=_fg(qnform,"difficulty")
+  return qn;
+ 
 def save_qn(qnform):
   qn=Qns(title=_fg(qnform,"title"),
          description=_fg(qnform,"description"),
@@ -91,6 +104,20 @@ def save_qn(qnform):
          difficulty=_fg(qnform,"difficulty"))
   return qn;
            
+def copy_qn(qn):
+  qn=CodeQnForm(initial={"title":qn.title,
+         "description":qn.description,
+         "smalllimits":qn.smalllimits,
+         "largelimits":qn.largelimits,
+         "inputexample":qn.inputexample,
+         "outputexample":qn.outputexample,
+         "utimesmall":qn.utimesmall,
+         "utimelarge":qn.utimelarge,
+         #smallscript:rfiles["qn.smallscript"],
+         #largescript:rfiles["qn.largescript"],
+         "difficulty":qn.difficulty})
+  return qn
+ 
 def addqns(request, testid):
   if int(testid) < 0:
     return HttpResponseRedirect(reverse("tests:show")) 
@@ -116,7 +143,12 @@ def addqns(request, testid):
         qnentry.save()
         return HttpResponseRedirect(reverse("tests:addqns",args=[thistest.id])) 
       except Exception,e:
-        codeQnForm.add_error(None,"Failed to save the form:"+str(e))
+        if "smallscript" not  in request.FILES:
+          codeQnForm.add_error(None,"both script files are mandatory")
+        elif "largescript" not in request.FILES:
+          codeQnForm.add_error(None,"both script files are mandatory")
+        else:
+          codeQnForm.add_error(None,"Failed to save the form:"+str(e))
         print("Failed to save question:"+str(e))
     else:
       print "QnForm failed"
@@ -174,4 +206,41 @@ def unlinkqn(request, testid):
     return JsonResponse({"success":0}) 
   except:
     return JsonResponse({"success":-1}) 
+
+def delFile(p):
+  os.remove(p)
+
+def editqn(request, qnid):
+  if int(qnid) < 0:
+    return HttpResponseRedirect(reverse("tests:show")) 
+  thisqn = None
+  try:
+    thisqn = Qns.objects.get(pk=int(qnid))
+  except:
+    return HttpResponseRedirect(reverse("tests:show")) 
+  codeQnForm=None
+  if request.method == "GET":
+    codeQnForm = copy_qn(thisqn) 
+  if request.method == "POST":
+    codeQnForm=CodeQnForm(request.POST, request.FILES)
+    if codeQnForm.is_valid():
+      update_qn(thisqn,codeQnForm)
+      # only update files if user uploaded new ones
+      if "smallscript" in request.FILES:
+        delFile(thisqn.smallscript.path)
+        thisqn.smallscript = request.FILES["smallscript"]
+        print thisqn.smallscript.path
+      if "largescript" in request.FILES:
+        delFile(thisqn.largescript.path)
+        thisqn.largescript = request.FILES["largescript"]
+        print thisqn.largescript.path
+      try:
+        thisqn.save()
+        return HttpResponseRedirect(reverse("tests:show"))
+      except Exception,e:
+        codeQnForm.add_error(None,"Failed to update qn")
+        print("Failed to update question:"+str(e))
+  return render(request, "codetests/codetests_editqn.html",{ "theqn": thisqn,
+                                                          "form": codeQnForm})
+
 

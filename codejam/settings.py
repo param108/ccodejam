@@ -131,6 +131,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 MEDIA_URL="/media/"
 BASE_URL=""
+MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
 # For Prod
 # BASE_URL="/codejam"
 LOGIN_REDIRECT_URL = BASE_URL+'login'

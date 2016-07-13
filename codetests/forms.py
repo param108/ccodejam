@@ -24,7 +24,7 @@ class CodeQnForm(forms.Form):
   utimelarge=forms.IntegerField(label="large solution upload time(minutes)", 
     help_text="This is the time the user has to upload his solution file after downloading the large problem set")
   difficulty=forms.IntegerField(label="difficulty 0-easiest, 5-very hard")
-  smallscript=forms.FileField(label="script to generate small problem set", 
+  smallscript=forms.FileField(required=False, label="script to generate small problem set", 
                               allow_empty_file=False)
-  largescript=forms.FileField(label="script to generate large problem set",
+  largescript=forms.FileField(required=False, label="script to generate large problem set",
                               allow_empty_file=False)
