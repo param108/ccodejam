@@ -18,4 +18,6 @@ from django.contrib import admin
 from coding import views
 urlpatterns = [
     url(r'^tests/', views.testpage),
+    url(r'^start/(?P<testid>[0-9]+)/', views.starttest),
+    url(r'^timeremaining/(?P<testid>[0-9]+)/', views.timeremaining),
 ]

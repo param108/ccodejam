@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block headext %}
 {% load staticfiles %}
+{% load coding_extras %}
 <script type="text/javascript">
 window.onload = setupRefresh;
 
@@ -34,7 +35,7 @@ function refreshPage() {
 <td>{{a.testname}}</td>
 <td>{{a.start}}</td>
 <td>{{a.duration}} hours</td>
-<td><a class="btn btn-primary" href="{{base_url}}/go/start/{{a.id}}/">Start</a></td>
+<td><a class="btn btn-primary" href="{{base_url}}/go/start/{{a.id}}/">{{resume|dictget:a.id}}</a></td>
 </tr>
 {% endfor %}
 </table>

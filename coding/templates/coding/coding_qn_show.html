@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<script type="text/javascript">
+function tick() {
+ $.ajax({url:"{{base_url}}/go/timeremaining/{{attempt.testid.id}}/",
+         success:function(data) {
+           if (data.status == 0) {
+             $("#timeremaining").html(data.time);
+           }
+           setTimeout(tick, 30000);
+         },
+         error:function(data) {
+           setTimeout(tick, 30000);
+         }});
+}
+
+$(document).ready(function() {
+  tick();
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+.unattempted{background-color:orange;}
+.pass{background-color:green;}
+.fail{background-color:maroon;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Test Page:{{attempt.testid.testname}}</h2>
+</div>
+<h3>Questions</h3>
+<h2>Score:{{attempt.score}}</h2>
+<span>Time Remaining:</span><span id="timeremaining">Loading...</span>
+<div class="coding-list">
+{% if qnlist %}
+<table border=1 class="table table-striped">
+<tr class="row">
+<th>S.No</th>
+<th>Qn Name</th>
+<th>Small Set Status</th>
+<th>Large Set Status</th>
+<th>Actions</th>
+</tr>
+{% for qn in qnlist %}
+<tr class="row">
+<td>{{forloop.counter}}</td>
+<td>{{qn.qn.title}}</td>
+<td class="{{anslist|getsmallstatus:qn.qn.id}}">{{anslist|getsmallstatus:qn.qn.id}}</td>
+<td class="{{anslist|getlargestatus:qn.qn.id}}">{{anslist|getlargestatus:qn.qn.id}}</td>
+<td><a class="btn btn-success" href="{{base_url}}/go/question/{{qn.qn.id}}/">Attempt</a></td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<div>No Tests found</div>
+{% endif %}
+</div>
+{% endblock %}
