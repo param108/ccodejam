@@ -21,4 +21,7 @@ urlpatterns = [
     url(r'^start/(?P<testid>[0-9]+)/', views.starttest),
     url(r'^timeremaining/(?P<testid>[0-9]+)/', views.timeremaining),
     url(r'^question/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/', views.showquestion),
+    url(r'^uploadsolution/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/(?P<size>[a-z]+)/', views.upload),
+    url(r'^downloadqn/(?P<ansid>[0-9]+)/(?P<size>[a-z]+)/', views.dnload),
+    url(r'^uploadtime/(?P<ansid>[0-9]+)/', views.uploadtime),
 ]

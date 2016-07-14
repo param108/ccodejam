@@ -6,7 +6,8 @@ from codejam import settings
 import datetime
 from django.utils.timezone import is_naive
 import pytz
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
+from django.core.files import File
 # Create your views here.
 def testpage(request):
   os.environ['TZ']="Asia/Kolkata"
@@ -34,8 +35,8 @@ def generate_answers(attempt, qnlist):
   for qn in qnlist:
     qnid = qn.qn.id
     ret[qnid]=[]
-    smallans=Answer(testattempt=attempt, qn=qn.qn, attempt=1, qtype="small") 
-    largeans=Answer(testattempt=attempt, qn=qn.qn, attempt=1, qtype="large") 
+    smallans=Answer(testattempt=attempt, qn=qn.qn, qtype="small") 
+    largeans=Answer(testattempt=attempt, qn=qn.qn, qtype="large") 
     smallans.save()
     largeans.save()
     ret[qnid].append(smallans)
@@ -58,6 +59,10 @@ def get_answers(attempt, qnlist):
     ret[qnid].append(smallans)
     ret[qnid].append(largeans)
   return ret
+
+def get_answers_from_qnid_size(attempt, qnid, size):
+  answer = Answer.objects.filter(testattempt=attempt).filter(qn_id=qnid).filter(qtype=size)
+  return answer[0]
 
 def get_answers_from_qnid(attempt, qnid):
   ret={}
@@ -147,3 +152,94 @@ def showquestion(request, attemptid, qnid):
                                                       "anslist":anslist,
                                                       "qn":anslist[qnidx][0].qn,
                                                       "attempt":thisattempt}) 
+
+def get_sol_files(ans, num):
+  # files will be 1q (qns) 1a (soln)
+  qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"q.txt"
+  solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"a.txt"
+  with open(qnpath,'rb') as doc_file:
+    ans.qnset.save("qns.txt",File(doc_file), save=True)
+  with open(solpath,'rb') as doc_file:
+    ans.solution.save("sol.txt",File(doc_file), save=True)
+  ans.starttime = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+  td = None
+  if ans.qtype == "small":
+    td = datetime.timedelta(minutes=ans.qn.utimesmall)
+  else:
+    td = datetime.timedelta(minutes=ans.qn.utimelarge)
+  ans.endtime = ans.starttime +  td
+  ans.save()
+
+def upload(request, attemptid, qnid, size):
+  if size != "small" and size != "large":
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
+  qnidx = int(qnid)
+  attemptidx = int(attemptid)
+  if attemptidx < 0:
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  thisattempt = None
+  try:
+    thisattempt = TestAttempt.objects.get(pk=attemptidx)
+  except Exception,e:
+    print("Cant Find:"+str(e)) 
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  if request.user != thisattempt.user:
+    print("Invalid user")
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  ans = get_answers_from_qnid_size(thisattempt, qnidx, size) 
+  #get_sol_files(ans)  
+  return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+                                                            "ans":ans})
+
+def dnload(request, ansid, size):
+  if size != "small" and size != "large":
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
+  ansidx = int(ansid)
+  if ansidx < 0:
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  ans = None
+  try:
+    ans = Answer.objects.get(pk=ansidx)
+  except Exception,e:
+    print("Cant Find:"+str(e)) 
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  if request.user != ans.testattempt.user:
+    print("Invalid user")
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  # FIXME should actually be a random number
+  check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+  if not ans.endtime or check > ans.endtime:
+    ans.attempt+=1
+    get_sol_files(ans, 1)  
+  ans.qnset.open()
+  return HttpResponse(ans.qnset.read(),content_type="text/plain")
+
+def uploadtime(request, ansid):
+  ansidx = int(ansid)
+  if ansidx < 0:
+    return  JsonResponse({"status": -1}) 
+  ans = None
+  try:
+    ans = Answer.objects.get(pk=ansidx)
+  except Exception,e:
+    print("Cant Find:"+str(e)) 
+    return  JsonResponse({"status": -1}) 
+  if not ans.endtime:
+    return  JsonResponse({"status": -1}) 
+  
+  check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+  if check < ans.endtime:
+    td = ans.endtime - check
+    totalsecs = td.total_seconds()
+    mins = totalsecs/60
+    secs = totalsecs % 60
+    timestr="%02d:%02d"%(mins, secs)
+    return JsonResponse({"status":0,
+                         "time":timestr,
+                         "attemptnum":ans.attempt});
+  ans.endtime= None
+  ans.save()
+  # timeout code is 2
+  return  JsonResponse({"status": 2}) 
+
+

@@ -25,6 +25,8 @@ $(document).ready(function() {
 .unattempted{background-color:orange;}
 .pass{background-color:green;}
 .fail{background-color:maroon;}
+.btn {margin-top: 5px;
+     }
 </style> 
 {% endblock %}
 {% block content %}
@@ -48,6 +50,8 @@ $(document).ready(function() {
 <pre>{{qn.outputexample}}</pre>
 <h2>Time Limits for Uploading solutions</h2>
 <span>Small Set:{{qn.utimesmall}} minutes</span><br>
-<span>Large Set:{{qn.utimelarge}} minutes</span>
+<span>Large Set:{{qn.utimelarge}} minutes</span><br>
+<a class="btn btn-danger" href="{{base_url}}/go/uploadsolution/{{attempt.id}}/{{qn.id}}/small/">Attempt Small Solution Set</a><br>
+<a class="btn btn-danger" href="{{base_url}}/go/uploadsolution/{{attempt.id}}/{{qn.id}}/large/">Attempt Large Solution Set</a>
 </div>
 {% endblock %}

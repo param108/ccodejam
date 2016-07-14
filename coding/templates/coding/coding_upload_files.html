@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<script type="text/javascript">
+function tick() {
+ $.ajax({url:"{{base_url}}/go/uploadtime/{{ans.id}}/",
+         success:function(data) {
+           if (data.status == 0) {
+             $("#timeremaining").html(data.time);
+             $("#attemptnum").html(data.attemptnum);
+           } else if (data.status == 2) {
+             window.location.assign("{{base_url}}/go/question/{{ans.testattempt.id}}/{{ans.qn.id}}/{{ans.qtype}}/")
+           }
+           setTimeout(tick, 5000);
+         },
+         error:function(data) {
+           setTimeout(tick, 5000);
+         }});
+}
+
+$(document).ready(function() {
+  tick();
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+.unattempted{background-color:orange;}
+.pass{background-color:green;}
+.fail{background-color:maroon;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Upload Page: {{ans.qn.title}}</h2>
+</div>
+<h2>{{ans.qtype|title}} Problem Set</h2>
+<span>{{ans.qtype|title}} Set Status: </span><span class="{{ans.result}}">{{ans.result}}</span><br>
+</div>
+<span>Attempt Number:</span><span id="attemptnum">{{ans.attempt}}</span><br>
+<span>Time Remaining To Upload Solution:</span><span id="timeremaining">(will start when you download question set)</span><br>
+<span>(Right click and save the link below)</span><br>
+<a class="btn" href="{{base_url}}/go/downloadqn/{{ans.id}}/{{ans.qtype}}/">Download Question Set</a>
+
+<div>
+{% endblock %}

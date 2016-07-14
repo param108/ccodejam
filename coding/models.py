@@ -9,13 +9,13 @@ class TestAttempt(models.Model):
   score= models.IntegerField(default=0)
 
 def qn_upload(inst, filename):
-  return "ans/"+str(inst.user)+"/"+str(inst.qn)+"/"+inst.qtype+"/"+str(inst.attempt)+"/qn.txt"
+  return "ans/"+str(inst.testattempt.user.id)+"/"+str(inst.qn.id)+"/"+inst.qtype+"/"+str(inst.attempt)+"/qn.txt"
 
 def sol_upload(inst, filename):
-  return "ans/"+str(inst.user)+"/"+str(inst.qn)+"/"+inst.qtype+"/"+str(inst.attempt)+"/sol.txt"
+  return "ans/"+str(inst.testattempt.user.id)+"/"+str(inst.qn.id)+"/"+inst.qtype+"/"+str(inst.attempt)+"/sol.txt"
 
 def ans_upload(inst, filename):
-  return "ans/"+str(inst.user)+"/"+str(inst.qn)+"/"+inst.qtype+"/"+str(inst.attempt)+"/ans.txt"
+  return "ans/"+str(inst.testattempt.user.id)+"/"+str(inst.qn.id)+"/"+inst.qtype+"/"+str(inst.attempt)+"/ans.txt"
 
 def code_upload(inst, filename):
   outputname = ""
@@ -25,7 +25,7 @@ def code_upload(inst, filename):
     outputname = "code.c"
   else:
     outputname = "code"
-  return "ans/"+str(inst.user)+"/"+str(inst.qn)+"/"+inst.qtype+"/"+str(inst.attempt)+"/"+outputname
+  return "ans/"+str(inst.user.id)+"/"+str(inst.qn.id)+"/"+inst.qtype+"/"+str(inst.attempt)+"/"+outputname
 
 
 class Answer(models.Model):
@@ -33,7 +33,7 @@ class Answer(models.Model):
   qn = models.ForeignKey(Qns)
   # the random must be used to generate the question set.
   #random = models.IntegerField()
-  attempt = models.IntegerField()
+  attempt = models.IntegerField(default=0)
   # after every 3 minutes for the small solution
   # and every 8 minutes for the large solution the qn set will change for a user.
   # i.e he will not be allowed to upload a solution.
