@@ -17,11 +17,12 @@ from django.conf.urls import url
 from django.contrib import admin
 from codetests import views
 urlpatterns = [
-    url(r'^show/', views.show, name="show"),
-    url(r'^edit/(?P<testid>[0-9]+)/', views.edit, name="edit"),
-    url(r'^delete/(?P<testid>[0-9]+)/', views.delete, name="delete"),
-    url(r'^addqns/(?P<testid>[0-9]+)/', views.addqns, name="addqns"),
-    url(r'^editqn/(?P<qnid>[0-9]+)/', views.editqn),
-    url(r'^linkqn/(?P<testid>[0-9]+)/', views.linkqn),
-    url(r'^unlinkqn/(?P<testid>[0-9]+)/', views.unlinkqn),
+    url(r'^show/$', views.show, name="show"),
+    url(r'^edit/(?P<testid>[0-9]+)/$', views.edit, name="edit"),
+    url(r'^delete/(?P<testid>[0-9]+)/$', views.delete, name="delete"),
+    url(r'^addqns/(?P<testid>[0-9]+)/$', views.addqns, name="addqns"),
+    url(r'^editqn/(?P<qnid>[0-9]+)/$', views.editqn),
+    url(r'^linkqn/(?P<testid>[0-9]+)/$', views.linkqn),
+    url(r'^unlinkqn/(?P<testid>[0-9]+)/$', views.unlinkqn),
+    url(r'^viewfile/(?P<qnid>[0-9]+)/(?P<size>[a-z]+)/$', views.viewfile),
 ]

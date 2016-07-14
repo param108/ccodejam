@@ -87,6 +87,7 @@ $(document).ready(function() {
 <div class="fieldWrapper">
     {{ form.smallscript.errors }}
     <label for="{{ form.smallscript.id_for_label }}">{{form.smallscript.label}}</label>
+    <span><em><a target="_blank" href="/tests/viewfile/{{theqn.id}}/small/">View Current File</a></em></span>
     {{ form.smallscript }}
     <span><em>{{form.smallscript.help_text}}</em></span>
 </div>
@@ -94,6 +95,7 @@ $(document).ready(function() {
 <div class="fieldWrapper">
     {{ form.largescript.errors }}
     <label for="{{ form.largescript.id_for_label }}">{{form.largescript.label}}</label>
+    <span><em><a target="_blank" href="/tests/viewfile/{{theqn.id}}/large/">View Current File</a></em></span>
     {{ form.largescript }}
     <span><em>{{form.largescript.help_text}}</em></span>
 </div>

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse,HttpResponseRedirect,JsonResponse
+from django.http import HttpResponse,HttpResponseRedirect,JsonResponse,HttpResponseNotFound
 from coding.models import Qns
 from forms import CodeTestForm,CodeQnForm
 from models import CodeTests,CodeQnsList
@@ -208,7 +208,11 @@ def unlinkqn(request, testid):
     return JsonResponse({"success":-1}) 
 
 def delFile(p):
-  os.remove(p)
+  try:
+    os.remove(p)
+  except:
+    # do nothing if we cant delete it
+    pass
 
 def editqn(request, qnid):
   if int(qnid) < 0:
@@ -236,11 +240,35 @@ def editqn(request, qnid):
         print thisqn.largescript.path
       try:
         thisqn.save()
-        return HttpResponseRedirect(reverse("tests:show"))
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
       except Exception,e:
         codeQnForm.add_error(None,"Failed to update qn")
         print("Failed to update question:"+str(e))
   return render(request, "codetests/codetests_editqn.html",{ "theqn": thisqn,
                                                           "form": codeQnForm})
 
-
+def viewfile(request, qnid, size):
+  if size != "small" and size != "large":
+    return HttpResponseNotFound("<h1>Not Found</h1>")
+  if int(qnid) < 0:
+    return HttpResponseNotFound("<h1>Not Found</h1>")
+  thisqn = None
+  try:
+    thisqn = Qns.objects.get(pk=int(qnid))
+  except:
+    return HttpResponseNotFound("<h1>Not Found</h1>")
+  if size == "small": 
+    fp = thisqn.smallscript;
+  else:
+    fp = thisqn.largescript;
+  try:
+    fp.open();
+    data = fp.read();
+  except Exception,e:
+    print("Failed to read %s script file:%s"%(size, str(e)))
+    return HttpResponseNotFound("<h1>Not Found</h1>")
+    
+  title=size+" problem set file for question '"+thisqn.title+"'"
+  return render(request,"codetests/simplefile.html",{"data": data,
+                                                     "title":title})
+   
