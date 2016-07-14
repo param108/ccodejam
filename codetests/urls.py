@@ -18,6 +18,7 @@ from django.contrib import admin
 from codetests import views
 urlpatterns = [
     url(r'^show/$', views.show, name="show"),
+    url(r'^questions/$', views.questions, name="questions"),
     url(r'^edit/(?P<testid>[0-9]+)/$', views.edit, name="edit"),
     url(r'^delete/(?P<testid>[0-9]+)/$', views.delete, name="delete"),
     url(r'^addqns/(?P<testid>[0-9]+)/$', views.addqns, name="addqns"),

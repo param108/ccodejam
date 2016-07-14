@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<style>
+.initiallyHidden{display:none;}
+</style> 
+<script type="text/javascript">
+function toggleAddQuestion() {
+  $("#addQuestion").toggle();
+}
+$(document).ready(function() {
+
+});
+</script>
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
+</div>
+<h2 class="addQnsH2">Add A New Question</h2>
+<button id="addQuestionBtn" class="btn btn-primary" onClick="return toggleAddQuestion()">Show/Hide New Question Form</button>
+<div id="addQuestion" >
+<form action="/tests/questions/" enctype="multipart/form-data" method="post">
+{% csrf_token %}
+<div class="codetests-input">
+{{ form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ form.title.errors }}
+    <label for="{{ form.title.id_for_label }}">{{form.title.label}}</label>
+    {{ form.title }}
+    <span><em>{{form.title.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.description.errors }}
+    <label for="{{ form.description.id_for_label }}">{{form.description.label}}</label>
+    {{ form.description }}
+    <span><em>{{form.description.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.smalllimits.errors }}
+    <label for="{{ form.smalllimits.id_for_label }}">{{form.smalllimits.label}}</label>
+    {{ form.smalllimits }}
+    <span><em>{{form.smalllimits.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.largelimits.errors }}
+    <label for="{{ form.largelimits.id_for_label }}">{{form.largelimits.label}}</label>
+    {{ form.largelimits }}
+    <span><em>{{form.largelimits.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.inputexample.errors }}
+    <label for="{{ form.inputexample.id_for_label }}">{{form.inputexample.label}}</label>
+    {{ form.inputexample }}
+    <span><em>{{form.inputexample.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.outputexample.errors }}
+    <label for="{{ form.outputexample.id_for_label }}">{{form.outputexample.label}}</label>
+    {{ form.outputexample }}
+    <span><em>{{form.outputexample.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.utimesmall.errors }}
+    <label for="{{ form.utimesmall.id_for_label }}">{{form.utimesmall.label}}</label>
+    {{ form.utimesmall }}
+    <span><em>{{form.utimesmall.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.utimelarge.errors }}
+    <label for="{{ form.utimelarge.id_for_label }}">{{form.utimelarge.label}}</label>
+    {{ form.utimelarge }}
+    <span><em>{{form.utimelarge.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.difficulty.errors }}
+    <label for="{{ form.difficulty.id_for_label }}">{{form.difficulty.label}}</label>
+    {{ form.difficulty }}
+    <span><em>{{form.difficulty.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.smallscript.errors }}
+    <label for="{{ form.smallscript.id_for_label }}">{{form.smallscript.label}}</label>
+    {{ form.smallscript }}
+    <span><em>{{form.smallscript.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
+    {{ form.largescript.errors }}
+    <label for="{{ form.largescript.id_for_label }}">{{form.largescript.label}}</label>
+    {{ form.largescript }}
+    <span><em>{{form.largescript.help_text}}</em></span>
+</div>
+<br>
+<input class="btn btn-success fieldSubmit" type="submit" value="Submit" />
+</div>
+</form>
+</div>
+<h2 class="addQnsH2">Choose From Existing Questions</h2>
+<div id="availableQuestions">
+<h3>Available Questions</h3>
+{% if not qnlist %}
+<span> No Questions Available Yet (why dont you add one?)</span>
+{% else %}
+<table class="table table-striped">
+<tr class="row">
+<th>Question Number</th> <th>Title</th> <th>Difficulty</th> <th>Actions</th>
+</tr>
+{% for qn in qnlist %}
+<tr class="row">
+<td>{{qn.id}}</td><td>{{qn.title}}</td><td>{{qn.difficulty}}</td>
+<td><a class="btn btn-success" href="/tests/editqn/{{qn.id}}/">Edit</a>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+</div>
+{% endblock %}

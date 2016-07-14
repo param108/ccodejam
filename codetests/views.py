@@ -29,6 +29,35 @@ def show(request):
       pass
   return render(request, "codetests/codetests_show.html",{"form": qnform, "tests": qns,
                                                           "base_url":settings.BASE_URL})
+
+def questions(request):
+  codeQnForm = CodeQnForm()
+  if request.method == "POST":
+    codeQnForm = CodeQnForm(request.POST, request.FILES)
+    if codeQnForm.is_valid():
+      try:
+        qn = save_qn(codeQnForm)
+        qn.save()
+        qn.smallscript=request.FILES["smallscript"]
+        qn.largescript=request.FILES["largescript"]
+        qn.save()
+        return HttpResponseRedirect(reverse("tests:questions")) 
+      except Exception,e:
+        if "smallscript" not  in request.FILES:
+          codeQnForm.add_error(None,"both script files are mandatory")
+        elif "largescript" not in request.FILES:
+          codeQnForm.add_error(None,"both script files are mandatory")
+        else:
+          codeQnForm.add_error(None,"Failed to save the form:"+str(e))
+        print("Failed to save question:"+str(e))
+    else:
+      print "QnForm failed"
+      codeQnForm.add_error(None,"Form Has Errors"+str(e))
+  qnlist = Qns.objects.all()
+  return render(request, "codetests/codetests_addqn.html",{"qnlist": qnlist,
+                                                          "form": codeQnForm })
+
+
 def delete(request,testid):
   # we are going back to show to avoid an infinite redirect loop
   # to edit
