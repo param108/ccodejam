@@ -19,9 +19,11 @@ def show(request):
   qnform = CodeTestForm(request.POST) 
   if qnform.is_valid():
     try:
+      print(qnform.cleaned_data["datetimefield"])
       newtest = CodeTests(testname = qnform.cleaned_data["testname"],
                         start = qnform.cleaned_data["datetimefield"],
                         duration = qnform.cleaned_data["duration"])
+      newtest.end = newtest.start + datetime.timedelta(hours=newtest.duration)
       newtest.save()
       return HttpResponseRedirect(reverse("tests:edit",args=[newtest.id])) 
     except Exception,e:
@@ -94,6 +96,7 @@ def edit(request,testid):
     thistest.testname = tform.cleaned_data["testname"]
     thistest.start = tform.cleaned_data["datetimefield"]
     thistest.duration = tform.cleaned_data["duration"]
+    thistest.end = thistest.start + datetime.timedelta(hours=thistest.duration)
     try:
       thistest.save()
       return HttpResponseRedirect(reverse("tests:edit",args=[thistest.id])) 

@@ -17,5 +17,5 @@ from django.conf.urls import url
 from django.contrib import admin
 from coding import views
 urlpatterns = [
-    url(r'^test/', views.testpage),
+    url(r'^tests/', views.testpage),
 ]

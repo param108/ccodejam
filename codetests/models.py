@@ -6,7 +6,9 @@ from django.db import models
 class CodeTests(models.Model):
   testname=models.CharField(unique=True, max_length=50)
   start=models.DateTimeField()
+  end=models.DateTimeField(null=True)
   duration=models.IntegerField()
+  valid=models.BooleanField(default=True)
 
 class CodeQnsList(models.Model):
   qn=models.ForeignKey(Qns)

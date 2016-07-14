@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<script type="text/javascript">
+window.onload = setupRefresh;
+
+function setupRefresh() {
+  setTimeout("refreshPage();", 60000);
+}
+function refreshPage() {
+   window.location = location.href;
+}
+</script>
+<style>
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
+</div>
+<h3>Available Tests</h3>
+<div class="coding-list">
+{% if tests %}
+<table class="table table-striped">
+<tr class="row">
+<th>Test Name</th>
+<th>Start Time</th>
+<th>Duration</th>
+<th>Actions</th>
+</tr>
+{% for a in tests %}
+<tr class="row">
+<td>{{a.testname}}</td>
+<td>{{a.start}}</td>
+<td>{{a.duration}} hours</td>
+<td><a class="btn btn-primary" href="{{base_url}}/go/start/{{a.id}}/">Start</a></td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<div>No Tests found</div>
+{% endif %}
+</div>
+{% endblock %}
