@@ -59,6 +59,21 @@ def get_answers(attempt, qnlist):
     ret[qnid].append(largeans)
   return ret
 
+def get_answers_from_qnid(attempt, qnid):
+  ret={}
+  ret[qnid]=[]
+  answers = Answer.objects.filter(testattempt=attempt).filter(qn_id=qnid) 
+  smallans = None
+  largeans = None
+  for ans in answers:
+    if ans.qtype=="small":
+      smallans=ans
+    else:
+      largeans=ans
+  ret[qnid].append(smallans)
+  ret[qnid].append(largeans)
+  return ret
+
 def starttest(request,testid):
   if int(testid) < 0:
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
@@ -82,7 +97,7 @@ def starttest(request,testid):
     print "%d attempts"%(len(attempts))
     testattempt=attempts[0]
     anslist = get_answers(testattempt, qnlist)
-  return render(request,"coding/coding_qn_show.html",{"base_url":settings.BASE_URL,
+  return render(request,"coding/coding_qnlist_show.html",{"base_url":settings.BASE_URL,
                                                       "anslist":anslist,
                                                       "qnlist":qnlist,
                                                       "attempt":testattempt})
@@ -108,3 +123,27 @@ def timeremaining(request, testid):
     return JsonResponse({"status":0,
                          "time":timestr});
   return  JsonResponse({"status": -1}) 
+
+def showquestion(request, attemptid, qnid):
+  qnidx = int(qnid)
+  attemptidx = int(attemptid)
+  if attemptidx < 0:
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  thisattempt = None
+  try:
+    thisattempt = TestAttempt.objects.get(pk=attemptidx)
+  except Exception,e:
+    print("Cant Find:"+str(e)) 
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  if request.user != thisattempt.user:
+    print("Invalid user")
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  anslist = get_answers_from_qnid(thisattempt, qnidx) 
+  if anslist[qnidx][0] == None or anslist[qnidx][1] == None:
+    print("Invalid Answers")
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+    
+  return render(request,"coding/coding_qn_show.html",{"base_url":settings.BASE_URL,
+                                                      "anslist":anslist,
+                                                      "qn":anslist[qnidx][0].qn,
+                                                      "attempt":thisattempt}) 

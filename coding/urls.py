@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^tests/', views.testpage),
     url(r'^start/(?P<testid>[0-9]+)/', views.starttest),
     url(r'^timeremaining/(?P<testid>[0-9]+)/', views.timeremaining),
+    url(r'^question/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/', views.showquestion),
 ]

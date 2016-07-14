@@ -31,23 +31,31 @@ $(document).ready(function() {
 <div>
 <h2 class="form-signin-heading header">CodeJam Test Page:{{attempt.testid.testname}}</h2>
 </div>
+<h3>Questions</h3>
+<h2>Score:{{attempt.score}}</h2>
 <span>Time Remaining:</span><span id="timeremaining">Loading...</span>
-<div>
-<h3>Question: {{qn.title}}</h3>
-<span>Small Set Status: </span><span class="{{anslist|getsmallstatus:qn.id}}">{{anslist|getsmallstatus:qn.id}}</span><br>
-<span>Large Set Status: </span><span class="{{anslist|getlargestatus:qn.id}}">{{anslist|getlargestatus:qn.id}}</span>
-<h2>Description</h2>
-<pre>{{qn.description}}</pre>
-<h2>Limits (small set)</h2>
-<pre>{{qn.smalllimits}}</pre>
-<h2>Limits (large set)</h2>
-<pre>{{qn.largelimits}}</pre>
-<h2>Sample Input</h2>
-<pre>{{qn.inputexample}}</pre>
-<h2>Sample Output</h2>
-<pre>{{qn.outputexample}}</pre>
-<h2>Time Limits for Uploading solutions</h2>
-<span>Small Set:{{qn.utimesmall}} minutes</span><br>
-<span>Large Set:{{qn.utimelarge}} minutes</span>
+<div class="coding-list">
+{% if qnlist %}
+<table border=1 class="table table-striped">
+<tr class="row">
+<th>S.No</th>
+<th>Qn Name</th>
+<th>Small Set Status</th>
+<th>Large Set Status</th>
+<th>Actions</th>
+</tr>
+{% for qn in qnlist %}
+<tr class="row">
+<td>{{forloop.counter}}</td>
+<td>{{qn.qn.title}}</td>
+<td class="{{anslist|getsmallstatus:qn.qn.id}}">{{anslist|getsmallstatus:qn.qn.id}}</td>
+<td class="{{anslist|getlargestatus:qn.qn.id}}">{{anslist|getlargestatus:qn.qn.id}}</td>
+<td><a class="btn btn-success" href="{{base_url}}/go/question/{{attempt.id}}/{{qn.qn.id}}/">Attempt</a></td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<div>No Tests found</div>
+{% endif %}
 </div>
 {% endblock %}
