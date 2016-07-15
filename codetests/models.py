@@ -10,7 +10,7 @@ def largescript_upload(inst, filename):
 
 # Create your models here.
 class Qns(models.Model):
-  title=models.TextField(unique=True)
+  title=models.CharField(unique=True, max_length=50)
   description=models.TextField()
   # smalllimits are the limits for small set
   smalllimits=models.TextField()
