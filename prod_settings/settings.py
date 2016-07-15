@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'coding',
     'codejamlogin',
-    'dashboard'
+    'dashboard',
+    'codetests'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -109,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -128,13 +129,13 @@ AUTHENTICATION_BACKENDS = [
 #    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-
+MEDIA_ROOT='/nobackup/paramp/codejam'
 BASE_URL="/codejam"
 # For Prod
 # BASE_URL="codejam/"
 LOGIN_URL=BASE_URL + "/login/"
-LGIN_REDIRECT_URL=BASE_URL + "/login/"
-
+LOGIN_REDIRECT_URL=BASE_URL + "/login/"
+DIFF="/usr/bin/diff"
 
 AUTH_LDAP_SERVER_URI = "ldap://ds.cisco.com:389"
 AUTH_LDAP_USER_DN_TEMPLATE = "cn=%(user)s, ou=employees, ou=cisco users, dc=cisco, dc=com"
