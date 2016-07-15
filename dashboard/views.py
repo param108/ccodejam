@@ -11,7 +11,7 @@ def show(request):
     rolestring = "Admin"
     btns.append({ 'name': "Create a test", "url":settings.BASE_URL+"/tests/show/"})
     btns.append({ 'name': "Add Question", "url":settings.BASE_URL+"/tests/questions/"})
-  btns.append({ 'name': "Open Tests", "url":settings.BASE_URL+"/coding/tests/"})
+  btns.append({ 'name': "Open Tests", "url":settings.BASE_URL+"/go/tests/"})
   #btns.append({ 'name': "Help", "url":settings.BASE_URL+"/docs/show/help1"})
   return render(request, 'dashboard/dashboard.html',
     { 'base_url': settings.BASE_URL,
