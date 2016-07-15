@@ -35,7 +35,7 @@ def login(request):
         django.contrib.auth.login(request, user)
 
         if nnext == (base_url + "/"):
-          nnext=base_url + "dashboard/show/"
+          nnext=base_url + "/dashboard/show/"
 
         return redirect(nnext)
     # login failure case
