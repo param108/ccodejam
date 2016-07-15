@@ -8,6 +8,8 @@ from django.utils.timezone import is_naive
 import pytz
 from django.http import JsonResponse,HttpResponse
 from django.core.files import File
+import subprocess
+from forms import Solution
 # Create your views here.
 def testpage(request):
   os.environ['TZ']="Asia/Kolkata"
@@ -189,7 +191,7 @@ def upload(request, attemptid, qnid, size):
   ans = get_answers_from_qnid_size(thisattempt, qnidx, size) 
   #get_sol_files(ans)  
   return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
-                                                            "ans":ans})
+                                                            "ans":ans, "form":Solution()})
 
 def dnload(request, ansid, size):
   if size != "small" and size != "large":
@@ -241,5 +243,41 @@ def uploadtime(request, ansid):
   ans.save()
   # timeout code is 2
   return  JsonResponse({"status": 2}) 
+
+def check_if_pass(ans):
+  rc = subprocess.check_call([setting.DIFF,ans.ans.path, ans.solution.path])   
+  if rc == 0:
+    ans.result="pass"
+    ans.testattempt.score += 1
+  else:
+    ans.result="fail"
+
+def uploadfile(request, ansid):
+  ansidx = int(ansid)
+  if ansidx < 0:
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  ans = None
+  try:
+    ans = Answer.objects.get(pk=ansidx)
+  except Exception,e:
+    print("Cant Find:"+str(e)) 
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  if request.user != ans.testattempt.user:
+    print("Invalid user")
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  # FIXME should actually be a random number
+  check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+  if not ans.endtime or check > ans.endtime:
+    return HttpResponseRedirect(settings.BASE_URL+"/go/uploadsolution/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
+  if request.method == "POST":
+    solform = Solution(request.POST, request.FILES)
+    if solform.is_valid(): 
+      ans.ans = request.FILES["solution"]
+      ans.codefile = request.FILES["code"]
+      ans.save()
+      check_if_pass(ans)
+      ans.save()
+  return HttpResponseRedirect(settings.BASE_URL+"/go/question/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
+
 
 

@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^uploadsolution/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/(?P<size>[a-z]+)/', views.upload),
     url(r'^downloadqn/(?P<ansid>[0-9]+)/(?P<size>[a-z]+)/', views.dnload),
     url(r'^uploadtime/(?P<ansid>[0-9]+)/', views.uploadtime),
+    url(r'^uploadfile/(?P<ansid>[0-9]+)/', views.uploadfile),
 ]

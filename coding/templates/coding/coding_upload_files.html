@@ -41,6 +41,8 @@ $(document).ready(function() {
 <span>Time Remaining To Upload Solution:</span><span id="timeremaining">(will start when you download question set)</span><br>
 <span>(Right click and save the link below)</span><br>
 <a class="btn" href="{{base_url}}/go/downloadqn/{{ans.id}}/{{ans.qtype}}/">Download Question Set</a>
-
+<table>
+{{form.as_table}}
+</table>
 <div>
 {% endblock %}

@@ -136,7 +136,7 @@ MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
 # BASE_URL="/codejam"
 LOGIN_REDIRECT_URL = BASE_URL+'login'
 LOGIN_URL=BASE_URL+"login/"
-
+DIFF="/usr/bin/diff"
 AUTH_LDAP_SERVER_URI = "ldap://ds.cisco.com:389"
 AUTH_LDAP_USER_DN_TEMPLATE = "cn=%(user)s, ou=employees, ou=cisco users, dc=cisco, dc=com"
 AUTH_LDAP_BIND_PASSWORD = ''
