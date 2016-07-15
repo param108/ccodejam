@@ -135,6 +135,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 MEDIA_ROOT='/nobackup/paramp/codejam'
+MEDIA_URL='/codejamdata/'
 # For Prod
 # BASE_URL="codejam/"
 LOGIN_URL=BASE_URL + "/login/"
