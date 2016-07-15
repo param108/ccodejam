@@ -80,8 +80,12 @@ WSGI_APPLICATION = 'codejam.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'XXXXX',
+        'USER': 'YYYYY',
+        'PASSWORD': 'ZZZZZ',
+        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
     }
 }
 
@@ -122,11 +126,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = BASE_URL+'/static/'
 STATIC_ROOT= os.path.join(BASE_DIR, 'static')
 
 AUTHENTICATION_BACKENDS = [
-#    'django_auth_ldap.backend.LDAPBackend',
+    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 MEDIA_ROOT='/nobackup/paramp/codejam'
