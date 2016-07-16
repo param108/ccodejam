@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^login/', codejamloginviews.login),
     url(r'^dashboard/',include('dashboard.urls')),
     url(r'^$', codejamloginviews.login),
+    url(r'^addadmin/$', codejamloginviews.show_admins)
 ]

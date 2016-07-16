@@ -5,6 +5,7 @@ from codejam import settings
 from models import admin_users
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from forms import admin_user_form
 # Create your views here.
 def login(request):
   base_url = settings.BASE_URL
