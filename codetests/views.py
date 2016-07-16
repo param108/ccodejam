@@ -26,7 +26,7 @@ def show(request):
                         duration = qnform.cleaned_data["duration"])
       newtest.end = newtest.start + datetime.timedelta(hours=newtest.duration)
       newtest.save()
-      return HttpResponseRedirect(reverse("tests:edit",args=[newtest.id])) 
+      return HttpResponseRedirect(settings.BASE_URL+reverse("tests:edit",args=[newtest.id])) 
     except Exception,e:
       qnform.add_error(None, "Failed to save the test"+str(e));
       pass
@@ -46,7 +46,7 @@ def questions(request):
         delFile(qn.smallscript.path)
         delFile(qn.largescript.path)
         qn.save()
-        return HttpResponseRedirect(reverse("tests:questions")) 
+        return HttpResponseRedirect(settings.BASE_URL+reverse("tests:questions")) 
       except Exception,e:
         if "smallscript" not  in request.FILES:
           codeQnForm.add_error(None,"both script files are mandatory")
@@ -68,27 +68,27 @@ def delete(request,testid):
   # we are going back to show to avoid an infinite redirect loop
   # to edit
   if int(testid) < 0:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   thistest = None
   try:
     thistest = CodeTests.objects.get(pk=int(testid))
   except Exception,e:
     print("Cant Find:"+str(e)) 
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   try:
     thistest.delete()
   except Exception,e:
     print("Cant Delete:"+str(e)) 
-  return HttpResponseRedirect(reverse("tests:show")) 
+  return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
  
 def edit(request,testid):
   if int(testid) < 0:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   thistest = None
   try:
     thistest = CodeTests.objects.get(pk=int(testid))
   except:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
  
   if request.method == "GET":
     tform = CodeTestForm(initial={"testname":thistest.testname, "datetimefield":thistest.start, "duration":thistest.duration}) 
@@ -103,7 +103,7 @@ def edit(request,testid):
     thistest.end = thistest.start + datetime.timedelta(hours=thistest.duration)
     try:
       thistest.save()
-      return HttpResponseRedirect(reverse("tests:edit",args=[thistest.id])) 
+      return HttpResponseRedirect(settings.BASE_URL+reverse("tests:edit",args=[thistest.id])) 
     except:
       pass
   
@@ -156,12 +156,12 @@ def copy_qn(qn):
  
 def addqns(request, testid):
   if int(testid) < 0:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   thistest = None
   try:
     thistest = CodeTests.objects.get(pk=int(testid))
   except:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
  
   codeQnForm = CodeQnForm()
   if request.method == "POST":
@@ -179,7 +179,7 @@ def addqns(request, testid):
         # add the new entry in the end
         qnentry = CodeQnsList(qn=qn,testid=thistest,seq=idx)
         qnentry.save()
-        return HttpResponseRedirect(reverse("tests:addqns",args=[thistest.id])) 
+        return HttpResponseRedirect(settings.BASE_URL+reverse("tests:addqns",args=[thistest.id])) 
       except Exception,e:
         if "smallscript" not  in request.FILES:
           codeQnForm.add_error(None,"both script files are mandatory")
@@ -202,7 +202,7 @@ def addqns(request, testid):
 @csrf_exempt
 def linkqn(request, testid):
   if int(testid) < 0:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   thistest = None
   try:
     thistest = CodeTests.objects.get(pk=int(testid))
@@ -227,7 +227,7 @@ def linkqn(request, testid):
 @csrf_exempt
 def unlinkqn(request, testid):
   if int(testid) < 0:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   thistest = None
   try:
     thistest = CodeTests.objects.get(pk=int(testid))
@@ -255,12 +255,12 @@ def delFile(p):
 
 def editqn(request, qnid):
   if int(qnid) < 0:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   thisqn = None
   try:
     thisqn = Qns.objects.get(pk=int(qnid))
   except:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   codeQnForm=None
   if request.method == "GET":
     codeQnForm = copy_qn(thisqn) 
@@ -318,9 +318,9 @@ def generate(request, testid):
   try:
     thistest = CodeTests.objects.get(pk=int(testid))
   except:
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   if thistest.generationStatus != "NOTSTARTED" and thistest.generationStatus != "ERRORED" and thistest.generationStatus != "DONE": 
-    return HttpResponseRedirect(reverse("tests:show")) 
+    return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
   if request.method=="GET":
     gen = GenerateForm()
     return render(request,"codetests/generate.html", {"form": gen, "tid": testid, 
@@ -333,7 +333,7 @@ def generate(request, testid):
         thistest.qnsgenerated=gen.cleaned_data["numqns"]
         thistest.generationStatus="AWAITING"
         thistest.save()
-        return HttpResponseRedirect(reverse("tests:show")) 
+        return HttpResponseRedirect(settings.BASE_URL+reverse("tests:show")) 
       else:
         gen.add_error("numqns","Must be a positive number")
     return render(request,"codetests/generate.html", {"form": gen, "tid": testid, 
