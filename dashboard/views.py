@@ -9,6 +9,7 @@ def show(request):
   rolestring = "User"
   if request.user.is_staff:
     rolestring = "Admin"
+    btns.append({ 'name': "Add Admin", "url":settings.BASE_URL+"/addadmin/"})
     btns.append({ 'name': "Create a test", "url":settings.BASE_URL+"/tests/show/"})
     btns.append({ 'name': "Add Question", "url":settings.BASE_URL+"/tests/questions/"})
   btns.append({ 'name': "Open Tests", "url":settings.BASE_URL+"/go/tests/"})
