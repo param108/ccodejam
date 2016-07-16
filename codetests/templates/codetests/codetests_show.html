@@ -29,6 +29,7 @@ $(document).ready(function() {
 <th>Test Name</th>
 <th>Start Time</th>
 <th>Questions Generation Status</th>
+<th>Number Qns</th>
 <th>Actions</th>
 </tr>
 {% for a in tests %}
@@ -36,6 +37,7 @@ $(document).ready(function() {
 <td>{{a.testname}}</td>
 <td>{{a.start}}</td>
 <td class="{{a.generationStatus}}">{{a.generationStatus}}</td>
+<td class="{{a.generationStatus}}">{{a.qnsgenerated}}</td>
 <td><a class="btn btn-primary testaction " href="{{base_url}}/tests/edit/{{a.id}}/">Edit</a>
 <a class="btn btn-primary testaction " href="{{base_url}}/tests/generate/{{a.id}}/">Generate Answers</a> <a class="btn btn-warning testaction " href="{{base_url}}/tests/clone/{{a.id}}/">Clone</a></td>
 </tr>
