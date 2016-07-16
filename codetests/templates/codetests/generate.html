@@ -19,7 +19,7 @@ $(document).ready(function() {
 <h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
 </div>
 <h3>Generate Question Sets for: "{{thetest.testname}}"</h3>
-<form action="/tests/generate/{{tid}}/" method="post">
+<form action="{{base_url}}/tests/generate/{{tid}}/" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}

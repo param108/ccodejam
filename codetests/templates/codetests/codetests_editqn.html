@@ -17,7 +17,7 @@ $(document).ready(function() {
 </div>
 <h2 class="addQnsH2">Edit Question</h2>
 <div id="addQuestion" >
-<form action="/tests/editqn/{{theqn.id}}/" enctype="multipart/form-data" method="post">
+<form action="{{base_url}}/tests/editqn/{{theqn.id}}/" enctype="multipart/form-data" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}
@@ -87,7 +87,7 @@ $(document).ready(function() {
 <div class="fieldWrapper">
     {{ form.smallscript.errors }}
     <label for="{{ form.smallscript.id_for_label }}">{{form.smallscript.label}}</label>
-    <span><em><a target="_blank" href="/tests/viewfile/{{theqn.id}}/small/">View Current File</a></em></span>
+    <span><em><a target="_blank" href="{{base_url}}/tests/viewfile/{{theqn.id}}/small/">View Current File</a></em></span>
     {{ form.smallscript }}
     <span><em>{{form.smallscript.help_text}}</em></span>
 </div>
@@ -95,7 +95,7 @@ $(document).ready(function() {
 <div class="fieldWrapper">
     {{ form.largescript.errors }}
     <label for="{{ form.largescript.id_for_label }}">{{form.largescript.label}}</label>
-    <span><em><a target="_blank" href="/tests/viewfile/{{theqn.id}}/large/">View Current File</a></em></span>
+    <span><em><a target="_blank" href="{{base_url}}/tests/viewfile/{{theqn.id}}/large/">View Current File</a></em></span>
     {{ form.largescript }}
     <span><em>{{form.largescript.help_text}}</em></span>
 </div>

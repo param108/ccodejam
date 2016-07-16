@@ -48,7 +48,7 @@ $(document).ready(function() {
 {% endif %}
 </div>
 <h3>Add a New Test</h3>
-<form action="/tests/show/" method="post">
+<form action="{{base_url}}/tests/show/" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}

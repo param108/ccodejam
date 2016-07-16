@@ -21,7 +21,7 @@ $(document).ready(function() {
 <h2 class="addQnsH2">Add A New Question</h2>
 <button id="addQuestionBtn" class="btn btn-primary" onClick="return toggleAddQuestion()">Show/Hide New Question Form</button>
 <div id="addQuestion" >
-<form action="/tests/questions/" enctype="multipart/form-data" method="post">
+<form action="{{base_url}}/tests/questions/" enctype="multipart/form-data" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}
@@ -119,7 +119,7 @@ $(document).ready(function() {
 {% for qn in qnlist %}
 <tr class="row">
 <td>{{qn.id}}</td><td>{{qn.title}}</td><td>{{qn.difficulty}}</td>
-<td><a class="btn btn-success" href="/tests/editqn/{{qn.id}}/">Edit</a>
+<td><a class="btn btn-success" href="{{base_url}/tests/editqn/{{qn.id}}/">Edit</a>
 </td>
 </tr>
 {% endfor %}

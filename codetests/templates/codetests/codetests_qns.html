@@ -13,7 +13,7 @@ function toggleChosenQuestions() {
   $("#chosenQuestions").toggle();
 }
 function addClicked(qnid) {
-  $.ajax({url:"/tests/linkqn/{{tid}}/",
+  $.ajax({url:"{{base_url}}/tests/linkqn/{{tid}}/",
           method:"post",
           data: {qn: qnid},
           success: function(data) {
@@ -27,7 +27,7 @@ function addClicked(qnid) {
           }}); 
 }
 function removeClicked(qnid) {
-  $.ajax({url:"/tests/unlinkqn/{{tid}}/",
+  $.ajax({url:"{{base_url}}/tests/unlinkqn/{{tid}}/",
           method:"post",
           data: {qn: qnid},
           success: function(data) {
@@ -53,7 +53,7 @@ $(document).ready(function() {
 <h2 class="addQnsH2">Add A New Question</h2>
 <button id="addQuestionBtn" class="btn btn-primary" onClick="return toggleAddQuestion()">Show/Hide New Question Form</button>
 <div id="addQuestion" >
-<form action="/tests/addqns/{{tid}}/" enctype="multipart/form-data" method="post">
+<form action="{{base_url}}/tests/addqns/{{tid}}/" enctype="multipart/form-data" method="post">
 {% csrf_token %}
 <div class="codetests-input">
 {{ form.non_field_errors }}
@@ -152,7 +152,7 @@ $(document).ready(function() {
 {% for qn in qnlist %}
 <tr class="row">
 <td>{{qn.qn.id}}</td><td>{{qn.qn.title}}</td><td>{{qn.qn.difficulty}}</td>
-<td><a class="btn btn-success" href="/tests/editqn/{{qn.qn.id}}/">Edit</a>
+<td><a class="btn btn-success" href="{{base_url}}/tests/editqn/{{qn.qn.id}}/">Edit</a>
     <button class="btn btn-danger" onClick="return removeClicked({{qn.qn.id}});">Remove</button>
 </td>
 </tr>
@@ -172,7 +172,7 @@ $(document).ready(function() {
 {% for qn in notlist %}
 <tr class="row">
 <td>{{qn.id}}</td><td>{{qn.title}}</td><td>{{qn.difficulty}}</td>
-<td><a class="btn btn-success" href="/tests/editqn/{{qn.id}}/">Edit</a>
+<td><a class="btn btn-success" href="{{base_url}}/tests/editqn/{{qn.id}}/">Edit</a>
     <button class="btn btn-danger" onClick="return addClicked({{qn.id}});">Add to this test</button>
 </td>
 </tr>
