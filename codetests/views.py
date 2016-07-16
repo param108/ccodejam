@@ -172,8 +172,8 @@ def addqns(request, testid):
         qn.save()
         qn.smallscript=request.FILES["smallscript"]
         qn.largescript=request.FILES["largescript"]
-        delFile(thisqn.smallscript.path)
-        delFile(thisqn.largescript.path)
+        delFile(qn.smallscript.path)
+        delFile(qn.largescript.path)
         qn.save()
         idx=CodeQnsList.objects.filter(testid=thistest).count()
         # add the new entry in the end
