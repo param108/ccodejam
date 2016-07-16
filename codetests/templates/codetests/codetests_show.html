@@ -9,6 +9,12 @@ $(document).ready(function() {
 </script>
 <style>
 .initiallyHidden{display:none;}
+.testaction{padding:10px;}
+.STARTED{background-color: orange;}
+.DONE{background-color: green;}
+.AWAITING{background-color: orange;}
+.NOTSTARTED{background-color: red;}
+.ERRORED{background-color: crimson;}
 </style> 
 {% endblock %}
 {% block content %}
@@ -22,13 +28,16 @@ $(document).ready(function() {
 <tr class="row">
 <th>Test Name</th>
 <th>Start Time</th>
+<th>Questions Generation Status</th>
 <th>Actions</th>
 </tr>
 {% for a in tests %}
 <tr class="row">
 <td>{{a.testname}}</td>
 <td>{{a.start}}</td>
-<td><a class="btn btn-primary" href="{{base_url}}/tests/edit/{{a.id}}/">Edit</a></td>
+<td class="{{a.generationStatus}}">{{a.generationStatus}}</td>
+<td><a class="btn btn-primary testaction " href="{{base_url}}/tests/edit/{{a.id}}/">Edit</a>
+<a class="btn btn-primary testaction " href="{{base_url}}/tests/generate/{{a.id}}/">Generate Answers</a> <a class="btn btn-warning testaction " href="{{base_url}}/tests/clone/{{a.id}}/">Clone</a></td>
 </tr>
 {% endfor %}
 </table>

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect,JsonResponse,HttpResponseNotFound
 from models import Qns
-from forms import CodeTestForm,CodeQnForm
+from forms import CodeTestForm,CodeQnForm,GenerateForm
 from models import CodeTests,CodeQnsList
 import datetime
 import os,time
@@ -15,7 +15,8 @@ def show(request):
   qns = CodeTests.objects.all();
   if request.method == "GET":
     qnform = CodeTestForm(initial={'datetimefield':datetime.datetime.now()})
-    return render(request, "codetests/codetests_show.html",{"form": qnform, "tests": qns})
+    return render(request, "codetests/codetests_show.html",{"form": qnform, "tests": qns,
+                                                            "base_url":settings.BASE_URL})
   qnform = CodeTestForm(request.POST) 
   if qnform.is_valid():
     try:
@@ -57,7 +58,8 @@ def questions(request):
       codeQnForm.add_error(None,"Form Has Errors"+str(e))
   qnlist = Qns.objects.all()
   return render(request, "codetests/codetests_addqn.html",{"qnlist": qnlist,
-                                                          "form": codeQnForm })
+                                                          "form": codeQnForm,
+                                                          "base_url":settings.BASE_URL})
 
 
 def delete(request,testid):
@@ -190,7 +192,8 @@ def addqns(request, testid):
   for qn in qnlist:
     notlist = notlist.exclude(pk=qn.qn.id)
   return render(request, "codetests/codetests_qns.html",{ "thetest": thistest, "qnlist": qnlist, "notlist":notlist,
-                                                          "form": codeQnForm, "tid":thistest.id })
+                                                          "form": codeQnForm, "tid":thistest.id,
+                                                          "base_url":settings.BASE_URL})
 
 @csrf_exempt
 def linkqn(request, testid):
@@ -277,7 +280,8 @@ def editqn(request, qnid):
         codeQnForm.add_error(None,"Failed to update qn")
         print("Failed to update question:"+str(e))
   return render(request, "codetests/codetests_editqn.html",{ "theqn": thisqn,
-                                                          "form": codeQnForm})
+                                                          "form": codeQnForm,
+                                                          "base_url":settings.BASE_URL}) 
 
 def viewfile(request, qnid, size):
   if size != "small" and size != "large":
@@ -302,5 +306,35 @@ def viewfile(request, qnid, size):
     
   title=size+" problem set file for question '"+thisqn.title+"'"
   return render(request,"codetests/simplefile.html",{"data": data,
-                                                     "title":title})
+                                                     "title":title,
+                                                     "base_url":settings.BASE_URL}) 
    
+def generate(request, testid):
+  thistest = None
+  try:
+    thistest = CodeTests.objects.get(pk=int(testid))
+  except:
+    return HttpResponseRedirect(reverse("tests:show")) 
+  if thistest.generationStatus != "NOTSTARTED" and thistest.generationStatus != "ERRORED": 
+    return HttpResponseRedirect(reverse("tests:show")) 
+  if request.method=="GET":
+    gen = GenerateForm()
+    return render(request,"codetests/generate.html", {"form": gen, "tid": testid, 
+                                                      "thetest":thistest,
+                                                      "base_url":settings.BASE_URL}) 
+  if request.method=="POST":
+    gen = GenerateForm(request.POST)
+    if gen.is_valid():
+      if gen.cleaned_data["numqns"] > 0:
+        thistest.qnsgenerated=gen.cleaned_data["numqns"]
+        thistest.generationStatus="AWAITING"
+        thistest.save()
+        return HttpResponseRedirect(reverse("tests:show")) 
+      else:
+        gen.add_error("numqns","Must be a positive number")
+    return render(request,"codetests/generate.html", {"form": gen, "tid": testid, 
+                                                      "thetest": thistest,
+                                                      "base_url":settings.BASE_URL}) 
+
+def clone(request, testid):
+  pass

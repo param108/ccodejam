@@ -28,3 +28,6 @@ class CodeQnForm(forms.Form):
                               allow_empty_file=False)
   largescript=forms.FileField(required=False, label="script to generate large problem set",
                               allow_empty_file=False)
+
+class GenerateForm(forms.Form):
+  numqns=forms.IntegerField(label="Number of qn-answer sets you want to generate")

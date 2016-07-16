@@ -96,12 +96,10 @@ def starttest(request,testid):
   qnlist=CodeQnsList.objects.filter(testid=thistest)
   anslist = None
   if len(attempts) == 0:
-    print "0 attempts"
     testattempt=TestAttempt(user=request.user, testid=thistest)
     testattempt.save()
     anslist = generate_answers(testattempt, qnlist)
   else:
-    print "%d attempts"%(len(attempts))
     testattempt=attempts[0]
     anslist = get_answers(testattempt, qnlist)
   return render(request,"coding/coding_qnlist_show.html",{"base_url":settings.BASE_URL,

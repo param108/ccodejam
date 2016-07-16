@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<script type="text/javascript">
+function confirmdelete() {
+  return confirm("Are you sure you want to delete this test?");
+}
+$(document).ready(function() {
+    $("#id_datetimefield").datetimepicker({ format:'YYYY-MM-DD HH:mm' });
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Tests Dashboard</h2>
+</div>
+<h3>Generate Question Sets for: "{{thetest.testname}}"</h3>
+<form action="/tests/generate/{{tid}}/" method="post">
+{% csrf_token %}
+<div class="codetests-input">
+{{ form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ form.numqns.errors }}
+    <label for="{{ form.numqns.id_for_label }}">Number of question sets to generate:</label>
+    {{ form.numqns }}
+</div>
+<input class="btn btn-success fieldSubmit" type="submit" value="Submit" /></div>
+</form>
+{% endblock %}

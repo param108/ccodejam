@@ -35,6 +35,10 @@ class CodeTests(models.Model):
   end=models.DateTimeField(null=True)
   duration=models.IntegerField()
   valid=models.BooleanField(default=True)
+  # whether we are presently generating answer sets
+  qnsgenerated=models.IntegerField(default=0)
+  # NOTSTARTED, AWAITING, STARTED, DONE, ERRORED
+  generationStatus=models.CharField(max_length=20, default="NOTSTARTED")
 
 class CodeQnsList(models.Model):
   qn=models.ForeignKey(Qns)
