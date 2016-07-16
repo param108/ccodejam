@@ -10,7 +10,7 @@
     <tr><td>{{t.username}}</td><td>{{t.is_staff}}</td></tr>
 {% endfor %}
 </table>
-<form action="{{base_url}}/createuser/admins/" method="post">
+<form action="{{base_url}}/addadmin/" method="post">
     {% csrf_token %}
     <table>
     {{ form.as_table }} <!-- to include textboxes for team name and description -->
