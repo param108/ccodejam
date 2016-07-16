@@ -43,8 +43,11 @@ def questions(request):
         qn.save()
         qn.smallscript=request.FILES["smallscript"]
         qn.largescript=request.FILES["largescript"]
-        delFile(qn.smallscript.path)
-        delFile(qn.largescript.path)
+        try:
+          delFile(qn.smallscript.path)
+          delFile(qn.largescript.path)
+        except:
+          pass
         qn.save()
         return HttpResponseRedirect(reverse("tests:questions")) 
       except Exception,e:
@@ -172,8 +175,11 @@ def addqns(request, testid):
         qn.save()
         qn.smallscript=request.FILES["smallscript"]
         qn.largescript=request.FILES["largescript"]
-        delFile(qn.smallscript.path)
-        delFile(qn.largescript.path)
+        try:
+          delFile(qn.smallscript.path)
+          delFile(qn.largescript.path)
+        except:
+          pass
         qn.save()
         idx=CodeQnsList.objects.filter(testid=thistest).count()
         # add the new entry in the end
@@ -270,11 +276,17 @@ def editqn(request, qnid):
       update_qn(thisqn,codeQnForm)
       # only update files if user uploaded new ones
       if "smallscript" in request.FILES:
-        delFile(thisqn.smallscript.path)
+        try:
+          delFile(thisqn.smallscript.path)
+        except:
+          pass
         thisqn.smallscript = request.FILES["smallscript"]
         print thisqn.smallscript.path
       if "largescript" in request.FILES:
-        delFile(thisqn.largescript.path)
+        try:
+          delFile(thisqn.largescript.path)
+        except:
+          pass
         thisqn.largescript = request.FILES["largescript"]
         print thisqn.largescript.path
       try:
