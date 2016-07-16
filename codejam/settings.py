@@ -134,6 +134,7 @@ BASE_URL=""
 MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
 # For Prod
 # BASE_URL="/codejam"
+PYTHON="/usr/bin/python"
 LOGIN_REDIRECT_URL = BASE_URL+'login'
 LOGIN_URL=BASE_URL+"login/"
 DIFF="/usr/bin/diff"

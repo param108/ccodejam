@@ -24,7 +24,7 @@ os.environ['TZ']="asia/kolkata"
 urlpatterns = [
     url(r'^static/(?P<path>.*)$','django.views.static.serve',{'document_root':settings.STATIC_ROOT}),
     url(r'^admin/', admin.site.urls),
-    url(r'^go/', include('coding.urls')),
+    url(r'^go/', include('coding.urls', namespace="go")),
     url(r'^tests/', include('codetests.urls',namespace="tests")),
     url(r'^login/', codejamloginviews.login),
     url(r'^dashboard/',include('dashboard.urls')),

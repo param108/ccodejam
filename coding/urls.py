@@ -17,10 +17,10 @@ from django.conf.urls import url
 from django.contrib import admin
 from coding import views
 urlpatterns = [
-    url(r'^tests/', views.testpage),
-    url(r'^start/(?P<testid>[0-9]+)/', views.starttest),
+    url(r'^tests/', views.testpage, name="tests"),
+    url(r'^start/(?P<testid>[0-9]+)/', views.starttest, name="start"),
     url(r'^timeremaining/(?P<testid>[0-9]+)/', views.timeremaining),
-    url(r'^question/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/', views.showquestion),
+    url(r'^question/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/', views.showquestion, name="qn"),
     url(r'^uploadsolution/(?P<attemptid>[0-9]+)/(?P<qnid>[0-9]+)/(?P<size>[a-z]+)/', views.upload),
     url(r'^downloadqn/(?P<ansid>[0-9]+)/(?P<size>[a-z]+)/', views.dnload),
     url(r'^uploadtime/(?P<ansid>[0-9]+)/', views.uploadtime),

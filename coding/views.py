@@ -5,11 +5,13 @@ import os,time
 from codejam import settings
 import datetime
 from django.utils.timezone import is_naive
+from django.core.urlresolvers import reverse
 import pytz
-from django.http import JsonResponse,HttpResponse
+from django.http import JsonResponse,HttpResponse,HttpResponseRedirect
 from django.core.files import File
 import subprocess
 from forms import Solution
+import random
 # Create your views here.
 def testpage(request):
   os.environ['TZ']="Asia/Kolkata"
@@ -105,7 +107,8 @@ def starttest(request,testid):
   return render(request,"coding/coding_qnlist_show.html",{"base_url":settings.BASE_URL,
                                                       "anslist":anslist,
                                                       "qnlist":qnlist,
-                                                      "attempt":testattempt})
+                                                      "attempt":testattempt,
+                                          "return":reverse("go:tests")})
                                     
 def timeremaining(request, testid):
   if int(testid) < 0:
@@ -147,16 +150,17 @@ def showquestion(request, attemptid, qnid):
   if anslist[qnidx][0] == None or anslist[qnidx][1] == None:
     print("Invalid Answers")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-    
   return render(request,"coding/coding_qn_show.html",{"base_url":settings.BASE_URL,
                                                       "anslist":anslist,
                                                       "qn":anslist[qnidx][0].qn,
-                                                      "attempt":thisattempt}) 
+                                                      "attempt":thisattempt,
+                                           "return":reverse("go:start",
+                                                      args=[thisattempt.testid.id])}) 
 
 def get_sol_files(ans, num):
   # files will be 1q (qns) 1a (soln)
-  qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"q.txt"
-  solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"a.txt"
+  qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"q.txt"
+  solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"a.txt"
   with open(qnpath,'rb') as doc_file:
     ans.qnset.save("qns.txt",File(doc_file), save=True)
   with open(solpath,'rb') as doc_file:
@@ -187,9 +191,16 @@ def upload(request, attemptid, qnid, size):
     print("Invalid user")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   ans = get_answers_from_qnid_size(thisattempt, qnidx, size) 
-  #get_sol_files(ans)  
-  return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
-                                                            "ans":ans, "form":Solution()})
+  if ans.result=="pass":
+    return HttpResponseRedirect(reverse("go:qn", args=[str(ans.testattempt.id),
+                                                       str(ans.qn.id)])) 
+    
+  if request.method == "GET":
+    return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+                                                            "ans":ans, "form":Solution(),
+                                                            "return":reverse("go:qn", 
+                                                               args=[str(ans.testattempt.id),
+                                                               str(ans.qn.id)])})
 
 def dnload(request, ansid, size):
   if size != "small" and size != "large":
@@ -210,7 +221,9 @@ def dnload(request, ansid, size):
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   if not ans.endtime or check > ans.endtime:
     ans.attempt+=1
-    get_sol_files(ans, 1)  
+    random.seed()
+    r = random.randint(1,ans.testattempt.testid.qnsgenerated)
+    get_sol_files(ans, r)  
   ans.qnset.open()
   return HttpResponse(ans.qnset.read(),content_type="text/plain")
 
@@ -243,12 +256,18 @@ def uploadtime(request, ansid):
   return  JsonResponse({"status": 2}) 
 
 def check_if_pass(ans):
-  rc = subprocess.check_call([setting.DIFF,ans.ans.path, ans.solution.path])   
+  try:
+    rc = subprocess.check_call([settings.DIFF,ans.ans.path, ans.solution.path])   
+  except:
+    rc = 1
+
   if rc == 0:
     ans.result="pass"
     ans.testattempt.score += 1
+    return True
   else:
     ans.result="fail"
+    return False
 
 def uploadfile(request, ansid):
   ansidx = int(ansid)
@@ -265,16 +284,24 @@ def uploadfile(request, ansid):
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   # FIXME should actually be a random number
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-  if not ans.endtime or check > ans.endtime:
+  if not ans.endtime or check > ans.endtime or ans.result=="pass":
     return HttpResponseRedirect(settings.BASE_URL+"/go/uploadsolution/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
   if request.method == "POST":
     solform = Solution(request.POST, request.FILES)
     if solform.is_valid(): 
+      ans.uploadtime=check
       ans.ans = request.FILES["solution"]
       ans.codefile = request.FILES["code"]
       ans.save()
-      check_if_pass(ans)
+      if check_if_pass(ans):
+        ans.testattempt.save()
       ans.save()
+    else:
+      return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+                                                            "ans":ans, "form":solform,
+                                                            "return":reverse("go:qn", 
+                                                               args=[str(ans.testattempt.id),
+                                                               str(ans.qn.id)])})
   return HttpResponseRedirect(settings.BASE_URL+"/go/question/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
 
 

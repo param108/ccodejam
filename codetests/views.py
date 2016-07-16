@@ -43,6 +43,8 @@ def questions(request):
         qn.save()
         qn.smallscript=request.FILES["smallscript"]
         qn.largescript=request.FILES["largescript"]
+        delFile(qn.smallscript.path)
+        delFile(qn.largescript.path)
         qn.save()
         return HttpResponseRedirect(reverse("tests:questions")) 
       except Exception,e:
@@ -170,6 +172,8 @@ def addqns(request, testid):
         qn.save()
         qn.smallscript=request.FILES["smallscript"]
         qn.largescript=request.FILES["largescript"]
+        delFile(thisqn.smallscript.path)
+        delFile(thisqn.largescript.path)
         qn.save()
         idx=CodeQnsList.objects.filter(testid=thistest).count()
         # add the new entry in the end
@@ -315,7 +319,7 @@ def generate(request, testid):
     thistest = CodeTests.objects.get(pk=int(testid))
   except:
     return HttpResponseRedirect(reverse("tests:show")) 
-  if thistest.generationStatus != "NOTSTARTED" and thistest.generationStatus != "ERRORED": 
+  if thistest.generationStatus != "NOTSTARTED" and thistest.generationStatus != "ERRORED" and thistest.generationStatus != "DONE": 
     return HttpResponseRedirect(reverse("tests:show")) 
   if request.method=="GET":
     gen = GenerateForm()

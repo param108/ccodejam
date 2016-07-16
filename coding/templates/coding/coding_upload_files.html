@@ -33,6 +33,7 @@ $(document).ready(function() {
 {% block content %}
 <div>
 <h2 class="form-signin-heading header">CodeJam Upload Page: {{ans.qn.title}}</h2>
+<a href="{{return}}">Back to Question</a>
 </div>
 <h2>{{ans.qtype|title}} Problem Set</h2>
 <span>{{ans.qtype|title}} Set Status: </span><span class="{{ans.result}}">{{ans.result}}</span><br>
@@ -41,8 +42,12 @@ $(document).ready(function() {
 <span>Time Remaining To Upload Solution:</span><span id="timeremaining">(will start when you download question set)</span><br>
 <span>(Right click and save the link below)</span><br>
 <a class="btn" href="{{base_url}}/go/downloadqn/{{ans.id}}/{{ans.qtype}}/">Download Question Set</a>
+<form action="{{base_url}}/go/uploadfile/{{ans.id}}/" method="post" enctype="multipart/form-data">
+{% csrf_token %}
 <table>
 {{form.as_table}}
 </table>
+<input type="submit" value="Submit"></input>
+</form>
 <div>
 {% endblock %}
