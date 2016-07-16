@@ -108,7 +108,7 @@ def starttest(request,testid):
                                                       "anslist":anslist,
                                                       "qnlist":qnlist,
                                                       "attempt":testattempt,
-                                          "return":settings.BASE_URL+reverse("go:tests")})
+                                          "return":reverse("go:tests")})
                                     
 def timeremaining(request, testid):
   if int(testid) < 0:
@@ -154,7 +154,7 @@ def showquestion(request, attemptid, qnid):
                                                       "anslist":anslist,
                                                       "qn":anslist[qnidx][0].qn,
                                                       "attempt":thisattempt,
-                                           "return":settings.BASE_URL+reverse("go:start",
+                                           "return":reverse("go:start",
                                                       args=[thisattempt.testid.id])}) 
 
 def get_sol_files(ans, num):
@@ -192,7 +192,7 @@ def upload(request, attemptid, qnid, size):
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   ans = get_answers_from_qnid_size(thisattempt, qnidx, size) 
   if ans.result=="pass":
-    return HttpResponseRedirect(settings.BASE_URL+reverse("go:qn", args=[str(ans.testattempt.id),
+    return HttpResponseRedirect(reverse("go:qn", args=[str(ans.testattempt.id),
                                                        str(ans.qn.id)])) 
     
   if request.method == "GET":
@@ -299,7 +299,7 @@ def uploadfile(request, ansid):
     else:
       return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
                                                             "ans":ans, "form":solform,
-                                                            "return":settings.BASE_URL+reverse("go:qn", 
+                                                            "return":reverse("go:qn", 
                                                                args=[str(ans.testattempt.id),
                                                                str(ans.qn.id)])})
   return HttpResponseRedirect(settings.BASE_URL+"/go/question/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
