@@ -291,7 +291,7 @@ def editqn(request, qnid):
         print thisqn.largescript.path
       try:
         thisqn.save()
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        return HttpResponseRedirect(reverse("tests:questions"))
       except Exception,e:
         codeQnForm.add_error(None,"Failed to update qn")
         print("Failed to update question:"+str(e))

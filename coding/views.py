@@ -263,7 +263,10 @@ def check_if_pass(ans):
 
   if rc == 0:
     ans.result="pass"
-    ans.testattempt.score += 1
+    if ans.qtype == "small":
+      ans.testattempt.score += 1
+    elif ans.qtype == "large":
+      ans.testattempt.score += 5
     return True
   else:
     ans.result="fail"
