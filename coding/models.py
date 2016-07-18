@@ -52,4 +52,5 @@ class Answer(models.Model):
   result = models.CharField(max_length=12,choices=(("pass", "pass"),("fail", "fail"),("unattempted", "unattempted")), default="unattempted")
   # based on running the code they have submitted
   coderesult = models.CharField(max_length=12, choices=(("pass", "pass"),("fail", "fail"),("unattempted","unattempted")), default="unattempted")
+  solnum = models.IntegerField(default=0)
 

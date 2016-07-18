@@ -159,12 +159,13 @@ def showquestion(request, attemptid, qnid):
 
 def get_sol_files(ans, num):
   # files will be 1q (qns) 1a (soln)
-  qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"q.txt"
-  solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"a.txt"
-  with open(qnpath,'rb') as doc_file:
-    ans.qnset.save("qns.txt",File(doc_file), save=True)
-  with open(solpath,'rb') as doc_file:
-    ans.solution.save("sol.txt",File(doc_file), save=True)
+  # qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"q.txt"
+  # solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"a.txt"
+  # with open(qnpath,'rb') as doc_file:
+  #   ans.qnset.save("qns.txt",File(doc_file), save=True)
+  # with open(solpath,'rb') as doc_file:
+  #   ans.solution.save("sol.txt",File(doc_file), save=True)
+  ans.solnum = num
   ans.starttime = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   td = None
   if ans.qtype == "small":
@@ -217,15 +218,16 @@ def dnload(request, ansid, size):
   if request.user != ans.testattempt.user:
     print("Invalid user")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-  # FIXME should actually be a random number
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   if not ans.endtime or check > ans.endtime:
     ans.attempt+=1
     random.seed()
     r = random.randint(1,ans.testattempt.testid.qnsgenerated)
     get_sol_files(ans, r)  
-  ans.qnset.open()
-  return HttpResponse(ans.qnset.read(),content_type="text/plain")
+  qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"q.txt"
+  #ans.qnset.open()
+  fp = open(qnpath,'r')
+  return HttpResponse(fp.read(),content_type="text/plain")
 
 def uploadtime(request, ansid):
   ansidx = int(ansid)
@@ -256,8 +258,9 @@ def uploadtime(request, ansid):
   return  JsonResponse({"status": 2}) 
 
 def check_if_pass(ans):
+  solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"a.txt"
   try:
-    rc = subprocess.check_call([settings.DIFF,ans.ans.path, ans.solution.path])   
+    rc = subprocess.check_call([settings.DIFF,ans.ans.path, solpath])   
   except:
     rc = 1
 
