@@ -19,7 +19,7 @@ from django.conf.urls import url, include
 from codejamlogin import views as codejamloginviews
 from codejam import settings
 import os
-os.environ['TZ']="asia/kolkata"
+os.environ['TZ']="Asia/Kolkata"
 
 urlpatterns = [
     url(r'^static/(?P<path>.*)$','django.views.static.serve',{'document_root':settings.STATIC_ROOT}),
