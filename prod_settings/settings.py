@@ -142,6 +142,7 @@ LOGIN_URL=BASE_URL + "/login/"
 LOGIN_REDIRECT_URL=BASE_URL + "/login/"
 DIFF="/usr/bin/diff"
 PYTHON="/nobackup/paramp/django/bin/python"
+DOS2UNIX=os.path.join(BASE_DIR,'scripts/dos2unix.py')
 
 AUTH_LDAP_SERVER_URI = "ldap://ds.cisco.com:389"
 AUTH_LDAP_USER_DN_TEMPLATE = "cn=%(user)s, ou=employees, ou=cisco users, dc=cisco, dc=com"
