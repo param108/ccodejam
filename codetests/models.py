@@ -44,6 +44,7 @@ class Qns(models.Model):
   # the files need to be uploaded after the first save!!!
   smallscript=models.FileField(upload_to=smallscript_upload, null=True)
   largescript=models.FileField(upload_to=largescript_upload, null=True)
+  # this script must update in place the ans file
   translatorscript=models.FileField(upload_to=translatorscript_upload, null=True)
   # number of questions uploaded so far (useful for numbering when you are 
   # uploading more questions.
@@ -55,7 +56,7 @@ class Qns(models.Model):
   # match
   directupload=models.FileField(upload_to=directupload_upload, null=True)
   difficulty=models.IntegerField(default=1)
-  largescore=models.IntegerField(default=5)
+  largescore=models.IntegerField(default=5, null=True)
   smallscore=models.IntegerField(default=2) 
 
 # Create your models here.

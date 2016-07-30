@@ -260,7 +260,10 @@ def uploadtime(request, ansid):
 def check_if_pass(ans):
   solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"a.txt"
   try:
-    rc = subprocess.check_call([settings.PYTHON, settings.DOS2UNIX,ans.ans.path])   
+    if ans.qn.needdos2unix:
+      rc = subprocess.check_call([settings.PYTHON, settings.DOS2UNIX,ans.ans.path])   
+    if ans.qn.needtranslator:
+      rc = subprocess.check_call([settings.PYTHON, ans.qn.translatorscript.path,ans.ans.path])   
     rc = subprocess.check_call([settings.DIFF,ans.ans.path, solpath])   
   except:
     rc = 1

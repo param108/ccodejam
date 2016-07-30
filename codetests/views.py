@@ -41,26 +41,32 @@ def questions(request):
       try:
         qn = save_qn(codeQnForm)
         qn.save()
-        qn.smallscript=request.FILES["smallscript"]
-        qn.largescript=request.FILES["largescript"]
-        try:
+        if qn.needtranslator and "translatorscript" in request.FILES:
+          qn.translatorscript=request.FILES["translatorscript"]
+          delFile(qn.translatorscript.path)
+        if not qn.usesuploadedqns and "smallscript" in request.FILES:
+          qn.smallscript=request.FILES["smallscript"]
           delFile(qn.smallscript.path)
-          delFile(qn.largescript.path)
-        except:
-          pass
+          if qn.need2questions and "largescript" in request.FILES:
+            qn.largescript=request.FILES["largescript"]
+            delFile(qn.largescript.path)
+        else:
+          # it is fine to not upload the directupload file every time
+          if "directupload" in request.FILES:
+            qn.directupload=request.FILES["directupload"]
         qn.save()
         return HttpResponseRedirect(reverse("tests:questions")) 
       except Exception,e:
-        if "smallscript" not  in request.FILES:
-          codeQnForm.add_error(None,"both script files are mandatory")
-        elif "largescript" not in request.FILES:
-          codeQnForm.add_error(None,"both script files are mandatory")
+        if "smallscript" not  in request.FILES or \
+           "directupload" not in request.FILES or \
+           "largescript" not in request.FILES:
+          codeQnForm.add_error(None,"Make sure you upload all required files:"+str(e))
         else:
           codeQnForm.add_error(None,"Failed to save the form:"+str(e))
         print("Failed to save question:"+str(e))
     else:
       print "QnForm failed"
-      codeQnForm.add_error(None,"Form Has Errors"+str(e))
+      codeQnForm.add_error(None,"Form Has Errors")
   qnlist = Qns.objects.all()
   return render(request, "codetests/codetests_addqn.html",{"qnlist": qnlist,
                                                           "form": codeQnForm,
@@ -114,16 +120,26 @@ def edit(request,testid):
                                                            "base_url":settings.BASE_URL})
 # _f_orm _g_et
 def _fg(t,k):
-  return t.cleaned_data[k] 
+  if k in t.cleaned_data:
+    return t.cleaned_data[k] 
+  else:
+    # for boolean fields, not present is False
+    return False
 def update_qn(qn, qnform):
   qn.title=_fg(qnform,"title")
   qn.description=_fg(qnform,"description")
+  qn.need2questions=_fg(qnform,"need2questions")
+  qn.needtranslator=_fg(qnform,"needtranslator")
+  qn.needdos2unix=_fg(qnform,"needdos2unix")
+  qn.usesuploadedqns=_fg(qnform,"usesuploadedqns")
   qn.smalllimits=_fg(qnform,"smalllimits")
   qn.largelimits=_fg(qnform,"largelimits")
   qn.inputexample=_fg(qnform,"inputexample")
   qn.outputexample=_fg(qnform,"outputexample")
   qn.utimesmall=_fg(qnform,"utimesmall")
   qn.utimelarge=_fg(qnform,"utimelarge")
+  qn.largescore=_fg(qnform,"largescore")
+  qn.smallscore=_fg(qnform,"smallscore")
          #smallscript=rfiles["smallscript"],
          #largescript=rfiles["largescript"],
   qn.difficulty=_fg(qnform,"difficulty")
@@ -131,6 +147,10 @@ def update_qn(qn, qnform):
  
 def save_qn(qnform):
   qn=Qns(title=_fg(qnform,"title"),
+         need2questions=_fg(qnform,"need2questions"),
+         needtranslator=_fg(qnform,"needtranslator"),
+         needdos2unix=_fg(qnform,"needdos2unix"),
+         usesuploadedqns=_fg(qnform,"usesuploadedqns"),
          description=_fg(qnform,"description"),
          smalllimits=_fg(qnform,"smalllimits"),
          largelimits=_fg(qnform,"largelimits"),
@@ -138,6 +158,8 @@ def save_qn(qnform):
          outputexample=_fg(qnform,"outputexample"),
          utimesmall=_fg(qnform,"utimesmall"),
          utimelarge=_fg(qnform,"utimelarge"),
+         largescore=_fg(qnform,"largescore"),
+         smallscore=_fg(qnform,"smallscore"),
          #smallscript=rfiles["smallscript"],
          #largescript=rfiles["largescript"],
          difficulty=_fg(qnform,"difficulty"))
@@ -145,13 +167,18 @@ def save_qn(qnform):
            
 def copy_qn(qn):
   qn=CodeQnForm(initial={"title":qn.title,
+         "need2questions":qn.need2questions,
+         "needtranslator":qn.needtranslator,
+         "usesuploadedqns":qn.usesuploadedqns,
+         "needdos2unix":qn.needdos2unix,
          "description":qn.description,
          "smalllimits":qn.smalllimits,
          "largelimits":qn.largelimits,
          "inputexample":qn.inputexample,
          "outputexample":qn.outputexample,
          "utimesmall":qn.utimesmall,
-         "utimelarge":qn.utimelarge,
+         "largescore":qn.largescore,
+         "smallscore":qn.smallscore,
          #smallscript:rfiles["qn.smallscript"],
          #largescript:rfiles["qn.largescript"],
          "difficulty":qn.difficulty})
@@ -173,11 +200,23 @@ def addqns(request, testid):
       try:
         qn = save_qn(codeQnForm)
         qn.save()
-        qn.smallscript=request.FILES["smallscript"]
-        qn.largescript=request.FILES["largescript"]
+        if qn.needtranslator:
+          qn.translatorscript=request.FILES["translatorscript"]
+        if not qn.usesuploadedqns:
+          qn.smallscript=request.FILES["smallscript"]
+          if qn.need2questions:
+            qn.largescript=request.FILES["largescript"]
+        else:
+          qn.directupload=request.FILES["directupload"]
         try:
-          delFile(qn.smallscript.path)
-          delFile(qn.largescript.path)
+          if not qn.usesloadedqns:
+            delFile(qn.smallscript.path)
+            if qn.need2questions:
+              delFile(qn.largescript.path)
+          else:
+            # no need to delete directuploaded files because they 
+            # will be deleted anyway.
+            pass
         except:
           pass
         qn.save()
@@ -187,10 +226,10 @@ def addqns(request, testid):
         qnentry.save()
         return HttpResponseRedirect(reverse("tests:addqns",args=[thistest.id])) 
       except Exception,e:
-        if "smallscript" not  in request.FILES:
-          codeQnForm.add_error(None,"both script files are mandatory")
-        elif "largescript" not in request.FILES:
-          codeQnForm.add_error(None,"both script files are mandatory")
+        if "smallscript" not  in request.FILES or \
+           "directupload" not in request.FILES or \
+           "largescript" not in request.FILES:
+          codeQnForm.add_error(None,"Make sure you upload all required files")
         else:
           codeQnForm.add_error(None,"Failed to save the form:"+str(e))
         print("Failed to save question:"+str(e))
