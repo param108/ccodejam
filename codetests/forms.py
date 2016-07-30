@@ -28,6 +28,19 @@ class CodeQnForm(forms.Form):
                               allow_empty_file=False)
   largescript=forms.FileField(required=False, label="script to generate large problem set",
                               allow_empty_file=False)
+  need2questions=forms.BooleanField(required=False, 
+    label="Does the question have a large question set?") 
+  needdos2unix=forms.BooleanField(required=False,
+    label="Does the answer need to pass through dos2unix?") 
+  usesuploadedqns=forms.BooleanField(required=False,
+    label="Will you upload the question sets yourself? (you can specify scripts otherwise)") 
+  needtranslator=forms.BooleanField(required=False,
+    label="Does the user submitted answer set need to pass through a translator script before comparison with the solution set")
+  directupload=forms.FileField(required=False, label="a .tgz archive of qns and answers", help_text="archive should have one main directory with 2 subdirectories 'large' and 'small'. Each of these directories will 2 subdirectories 'qns' and 'ans' . These directories should have numbered qn and ans files 1.txt 2.txt ... qns/1.txt is the question file for ans/1.txt")
+  translatorscript=forms.FileField(required=False, label="script to translate the submitted answer set before comparison with the solution set")
+  largescore=forms.IntegerField(required=False, label="score to give for the large question")
+  smallscore=forms.IntegerField(required=False, label="score to give for the small question")
+
 
 class GenerateForm(forms.Form):
   numqns=forms.IntegerField(label="Number of qn-answer sets you want to generate")
