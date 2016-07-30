@@ -6,9 +6,65 @@
 .initiallyHidden{display:none;}
 </style> 
 <script type="text/javascript">
-$(document).ready(function() {
+function usesuploadedqns_clicked() {
+  if (this.checked) {
+    $(".directupload-div").fadeIn();
+    $(".upload-qns-div").fadeOut();
+  } else {
+    $(".directupload-div").fadeOut();
+    $(".upload-qns-div").fadeIn();
+  }
+}
 
+function setup_usesuploadedqns() {
+  if ($('#id_usesuploadedqns')[0].checked) {
+    $(".directupload-div").show();
+    $(".upload-qns-div").hide();
+  } else {
+    $(".directupload-div").hide();
+    $(".upload-qns-div").show();
+  }
+}
+function need2questions_clicked() {
+  if (this.checked) {
+    $(".largequestion-div").fadeIn();
+  } else {
+    $(".largequestion-div").fadeOut();
+  }
+}
+
+function setup_need2questions() {
+  if ($('#id_need2questions')[0].checked) {
+    $(".largequestion-div").show();
+  } else {
+    $(".largequestion-div").hide();
+  }
+}
+function needtranslator_clicked() {
+  if (this.checked) {
+    $("#translator-div").fadeIn();
+  } else {
+    $("#translator-div").fadeOut();
+  }
+}
+
+function setup_needtranslator() {
+  if ($('#id_needtranslator')[0].checked) {
+    $("#translator-div").show();
+  } else {
+    $("#translator-div").hide();
+  }
+}
+
+$(document).ready(function() {
+setup_usesuploadedqns();
+$('#id_usesuploadedqns').change(usesuploadedqns_clicked);
+setup_need2questions();
+$('#id_need2questions').change(need2questions_clicked);
+setup_needtranslator();
+$('#id_needtranslator').change(needtranslator_clicked);
 });
+
 </script>
 {% endblock %}
 {% block content %}
@@ -43,13 +99,6 @@ $(document).ready(function() {
 </div>
 <br>
 <div class="fieldWrapper">
-    {{ form.largelimits.errors }}
-    <label for="{{ form.largelimits.id_for_label }}">{{form.largelimits.label}}</label>
-    {{ form.largelimits }}
-    <span><em>{{form.largelimits.help_text}}</em></span>
-</div>
-<br>
-<div class="fieldWrapper">
     {{ form.inputexample.errors }}
     <label for="{{ form.inputexample.id_for_label }}">{{form.inputexample.label}}</label>
     {{ form.inputexample }}
@@ -71,11 +120,75 @@ $(document).ready(function() {
 </div>
 <br>
 <div class="fieldWrapper">
+    {{ form.smallscore.errors }}
+    <label for="{{ form.smallscore.id_for_label }}">{{form.smallscore.label}}</label>
+    {{ form.smallscore }}
+    <span><em>{{form.smallscore.help_text}}</em></span>
+</div>
+<br>
+<div class="checkBoxWrapper">
+    {{ form.usesuploadedqns.errors }}
+    <label for="{{ form.usesuploadedqns.id_for_label }}">{{form.usesuploadedqns.label}}</label>
+    {{ form.usesuploadedqns }}
+    <span><em>{{form.usesuploadedqns.help_text}}</em></span>
+</div>
+<br>
+<div class="directupload-div">
+<div class="fieldWrapper">
+    {{ form.directupload.errors }}
+    <label for="{{ form.directupload.id_for_label }}">{{form.directupload.label}}</label>
+    {{ form.directupload }}
+    <span><em>{{form.directupload.help_text}}</em></span>
+</div>
+<br>
+</div> <!-- ends directupload-div --!>
+<div class="upload-qns-div">
+<div class="fieldWrapper">
+    {{ form.smallscript.errors }}
+    <label for="{{ form.smallscript.id_for_label }}">{{form.smallscript.label}}</label>
+    {{ form.smallscript }}
+    <span><em>{{form.smallscript.help_text}}</em></span>
+</div>
+<br>
+</div> <!-- ends upload-qns-div --!>
+<div class="checkBoxWrapper">
+    {{ form.need2questions.errors }}
+    <label for="{{ form.need2questions.id_for_label }}">{{form.need2questions.label}}</label>
+    {{ form.need2questions }}
+    <span><em>{{form.need2questions.help_text}}</em></span>
+</div>
+<br>
+<div class="largequestion-div">
+<div class="fieldWrapper">
+    {{ form.largelimits.errors }}
+    <label for="{{ form.largelimits.id_for_label }}">{{form.largelimits.label}}</label>
+    {{ form.largelimits }}
+    <span><em>{{form.largelimits.help_text}}</em></span>
+</div>
+<br>
+<div class="fieldWrapper">
     {{ form.utimelarge.errors }}
     <label for="{{ form.utimelarge.id_for_label }}">{{form.utimelarge.label}}</label>
     {{ form.utimelarge }}
     <span><em>{{form.utimelarge.help_text}}</em></span>
 </div>
+<br>
+<div class="fieldWrapper">
+    {{ form.largescore.errors }}
+    <label for="{{ form.largescore.id_for_label }}">{{form.largescore.label}}</label>
+    {{ form.largescore }}
+    <span><em>{{form.largescore.help_text}}</em></span>
+</div>
+<div class="upload-qns-div">
+<div class="fieldWrapper">
+    {{ form.largescript.errors }}
+    <label for="{{ form.largescript.id_for_label }}">{{form.largescript.label}}</label>
+    {{ form.largescript }}
+    <span><em>{{form.largescript.help_text}}</em></span>
+</div>
+<br>
+</div> <!-- ends upload-qns-div --!>
+</div> <!-- End of largequestion-div --!>
 <br>
 <div class="fieldWrapper">
     {{ form.difficulty.errors }}
@@ -84,24 +197,34 @@ $(document).ready(function() {
     <span><em>{{form.difficulty.help_text}}</em></span>
 </div>
 <br>
-<div class="fieldWrapper">
-    {{ form.smallscript.errors }}
-    <label for="{{ form.smallscript.id_for_label }}">{{form.smallscript.label}}</label>
-    <span><em><a target="_blank" href="{{base_url}}/tests/viewfile/{{theqn.id}}/small/">View Current File</a></em></span>
-    {{ form.smallscript }}
-    <span><em>{{form.smallscript.help_text}}</em></span>
+<div class="checkBoxWrapper">
+    {{ form.needdos2unix.errors }}
+    <label for="{{ form.needdos2unix.id_for_label }}">{{form.needdos2unix.label}}</label>
+    {{ form.needdos2unix }}
+    <span><em>{{form.needdos2unix.help_text}}</em></span>
 </div>
 <br>
+<div class="checkBoxWrapper">
+    {{ form.needtranslator.errors }}
+    <label for="{{ form.needtranslator.id_for_label }}">{{form.needtranslator.label}}</label>
+    {{ form.needtranslator }}
+    <span><em>{{form.needtranslator.help_text}}</em></span>
+</div>
+<div id="translator-div">
 <div class="fieldWrapper">
-    {{ form.largescript.errors }}
-    <label for="{{ form.largescript.id_for_label }}">{{form.largescript.label}}</label>
-    <span><em><a target="_blank" href="{{base_url}}/tests/viewfile/{{theqn.id}}/large/">View Current File</a></em></span>
-    {{ form.largescript }}
-    <span><em>{{form.largescript.help_text}}</em></span>
+    {{ form.translatorscript.errors }}
+    <label for="{{ form.translatorscript.id_for_label }}">{{form.translatorscript.label}}</label>
+    {{ form.translatorscript }}
+    <span><em>{{form.translatorscript.help_text}}</em></span>
+</div>
 </div>
 <br>
+
+<br>
+
 <input class="btn btn-success fieldSubmit" type="submit" value="Submit" />
 </div>
 </form>
 </div>
+
 {% endblock %}
