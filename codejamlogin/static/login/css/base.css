@@ -89,3 +89,16 @@ color: #ffc;
 .docs-note-span {
   color:darkmagenta;
 }
+
+.in-progress{background-color:red;
+             color: white;
+             padding-left: 10px;
+             padding-right: 10px;}
+.initiallyHidden{display:none;}
+.unattempted{background-color:orange;}
+.pass{background-color:green;}
+.fail{background-color:maroon;
+      color: white;
+      padding-left: 10px;
+      padding-right: 10px;}
+

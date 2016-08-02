@@ -49,7 +49,7 @@ class Answer(models.Model):
   codefile = models.FileField(upload_to=code_upload, null=True)
   qtype = models.CharField(max_length=10, choices=(("small", "small"),("large", "large")), default="small")
   # based on the solution diff, we will post a pass or fail.  
-  result = models.CharField(max_length=12,choices=(("pass", "pass"),("fail", "fail"),("unattempted", "unattempted")), default="unattempted")
+  result = models.CharField(max_length=12,choices=(("pass", "pass"),("fail", "fail"),("unattempted", "unattempted"),("in-progress","in-progress")), default="unattempted")
   # based on running the code they have submitted
   coderesult = models.CharField(max_length=12, choices=(("pass", "pass"),("fail", "fail"),("unattempted","unattempted")), default="unattempted")
   solnum = models.IntegerField(default=0)

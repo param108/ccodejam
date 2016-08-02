@@ -57,6 +57,7 @@ def get_answers(attempt, qnlist):
     smallans = None
     largeans = None
     for ans in answers:
+      updateAnsStatus(ans)
       if ans.qtype=="small":
         smallans=ans
       else:
@@ -68,7 +69,8 @@ def get_answers(attempt, qnlist):
 
 def get_answers_from_qnid_size(attempt, qnid, size):
   answer = Answer.objects.filter(testattempt=attempt).filter(qn_id=qnid).filter(qtype=size)
-  if len(answer):
+  if len(answer) == 1:
+    updateAnsStatus(answer[0])
     return answer[0]
   return None
 
@@ -79,6 +81,7 @@ def get_answers_from_qnid(attempt, qnid):
   smallans = None
   largeans = None
   for ans in answers:
+    updateAnsStatus(ans)
     if ans.qtype=="small":
       smallans=ans
     else:
@@ -163,7 +166,7 @@ def showquestion(request, attemptid, qnid):
                                            "return":reverse("go:start",
                                                       args=[thisattempt.testid.id])}) 
 
-def get_sol_files(ans, num):
+def get_new_sol_files(ans, num):
   # files will be 1q (qns) 1a (soln)
   # qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"q.txt"
   # solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(num)+"a.txt"
@@ -179,6 +182,7 @@ def get_sol_files(ans, num):
   else:
     td = datetime.timedelta(minutes=ans.qn.utimelarge)
   ans.endtime = ans.starttime +  td
+  ans.result="in-progress"
   ans.save()
 
 def upload(request, attemptid, qnid, size):
@@ -231,12 +235,22 @@ def dnload(request, ansid, size):
     ans.attempt+=1
     random.seed()
     r = random.randint(1,ans.testattempt.testid.qnsgenerated)
-    get_sol_files(ans, r)  
+    get_new_sol_files(ans, r)  
   qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"q.txt"
   #ans.qnset.open()
   fp = open(qnpath,'r')
   return HttpResponse(fp.read(),content_type="text/plain")
 
+def updateAnsStatus(ans):
+  if ans.result == "in-progress":
+    check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+    if not ans.endtime or check > ans.endtime:
+        ans.result = "fail"
+        ans.attempt += 1
+        ans.endtime = None
+        ans.save()
+      
+ 
 def uploadtime(request, ansid):
   ansidx = int(ansid)
   if ansidx < 0:
@@ -260,9 +274,7 @@ def uploadtime(request, ansid):
     return JsonResponse({"status":0,
                          "time":timestr,
                          "attemptnum":ans.attempt});
-  ans.endtime= None
-  ans.save()
-  # timeout code is 2
+ # timeout code is 2
   return  JsonResponse({"status": 2}) 
 
 def check_if_pass(ans):
