@@ -132,10 +132,12 @@ AUTHENTICATION_BACKENDS = [
 MEDIA_URL="/media/"
 BASE_URL=""
 MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
+TAR="/bin/tar"
 # For Prod
 # BASE_URL="/codejam"
 PYTHON="/usr/bin/python"
 DOS2UNIX=os.path.join(BASE_DIR,'scripts/dos2unix.py')
+DIRECTUPLOAD=os.path.join(BASE_DIR,'scripts/direct_upload.py')
 LOGIN_REDIRECT_URL = BASE_URL+'login'
 LOGIN_URL=BASE_URL+"login/"
 DIFF="/usr/bin/diff"

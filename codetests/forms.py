@@ -38,7 +38,7 @@ class CodeQnForm(forms.Form):
     label="Will you upload the question sets yourself? (you can specify scripts otherwise)") 
   needtranslator=forms.BooleanField(required=False,
     label="Does the user submitted answer set need to pass through a translator script before comparison with the solution set")
-  directupload=forms.FileField(required=False, label="a .tgz archive of qns and answers", help_text="archive should have one main directory with 2 subdirectories 'large' and 'small'. Each of these directories will 2 subdirectories 'qns' and 'ans' . These directories should have numbered qn and ans files 1.txt 2.txt ... qns/1.txt is the question file for ans/1.txt")
+  directupload=forms.FileField(required=False, label="a .tgz archive of qns and answers", help_text="archive should have 2 directories 'large' and 'small'. These directories should have numbered qn and ans files 1q.txt 1a.txt 2q.txt 2a.txt ... 1q.txt is the question file for 1a.txt")
   translatorscript=forms.FileField(required=False, label="script to translate the submitted answer set before comparison with the solution set")
   largescore=forms.IntegerField(required=False, label="score to give for the large question")
   smallscore=forms.IntegerField(label="score to give for the small question")

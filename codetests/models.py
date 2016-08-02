@@ -48,7 +48,8 @@ class Qns(models.Model):
   translatorscript=models.FileField(upload_to=translatorscript_upload, null=True)
   # number of questions uploaded so far (useful for numbering when you are 
   # uploading more questions.
-  numqnsuploaded=models.IntegerField(default=0)
+  numqnsuploadedlarge=models.IntegerField(default=0)
+  numqnsuploadedsmall=models.IntegerField(default=0)
   # directly upload qnsets
   # file should have 2 subdirectories qns and ans and the files should be
   # numbered 1.txt 2.txt etc... The files will be repeated if they dont meet

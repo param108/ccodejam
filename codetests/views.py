@@ -7,7 +7,7 @@ import datetime
 import os,time
 from django.core.urlresolvers import reverse
 from codejam import settings
-import subprocess
+import subprocess, re
 from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 def show(request):
@@ -36,13 +36,47 @@ def show(request):
 
 # accesses the direct upload tgz archive and populates the qns and ans
 def updateDirectUpload(qn):
-  if qn.usesdirectupload:
+  if qn.usesuploadedqns:
+    print "updateDirectUpload:"+qn.directupload.path
     if os.path.exists(qn.directupload.path):
       try:
-        subprocess.check_call([settings.PYTHON, settings.DIRECTUPLOAD, settings.TAR, qn.directupload.path])
+        subprocess.check_call([settings.PYTHON, settings.DIRECTUPLOAD, settings.TAR, qn.directupload.path, "%s/qns/%d/qnset/"%(settings.MEDIA_ROOT,qn.id)])
         delFile(qn.directupload.path) 
       except:
         pass
+    qn.numqnsuploadedsmall=renumberDirectUploads(qn, "small")
+    if qn.need2questions:
+      qn.numqnsuploadedlarge=renumberDirectUploads(qn, "large")
+    qn.save()
+
+def renumberfiles(present):
+  idx = 1
+  sorted_present = sorted(present) 
+  for i in sorted_present:
+    if idx != i:
+      subprocess.check_call(["mv","%dq.txt"%(i), "%dq.txt"%(idx)])
+      subprocess.check_call(["mv","%da.txt"%(i), "%da.txt"%(idx)])
+    idx+=1
+
+def renumberDirectUploads(qn, qtype):
+  os.chdir("%s/qns/%d/qnset/%s"%(settings.MEDIA_ROOT,qn.id,qtype))
+  files = os.listdir(".")
+  print files
+  getqns = re.compile('([0-9]+)q[.]txt')
+  numqns=0
+  present = []
+  for f in files:
+    m = getqns.match(f)
+    if m:
+      if os.path.exists(f.replace("q","a")):
+        numqns+=1 
+        present.append(int(m.group(1)))
+      else:
+        # if the 'a' doesnt exist for a 'q' delete it
+        delFile(f)
+  print str(present)
+  renumberfiles(present)    
+  return len(present)
 
 def questions(request):
   codeQnForm = CodeQnForm()
@@ -54,29 +88,33 @@ def questions(request):
         qn.save()
         if "smallscript" in request.FILES:
           try:
-            delFile(thisqn.smallscript.path)
+            delFile(qn.smallscript.path)
           except:
             pass
-          thisqn.smallscript = request.FILES["smallscript"]
+          qn.smallscript = request.FILES["smallscript"]
         if "largescript" in request.FILES:
           try:
-            delFile(thisqn.largescript.path)
+            delFile(qn.largescript.path)
           except:
             pass
-          thisqn.largescript = request.FILES["largescript"]
+          qn.largescript = request.FILES["largescript"]
         if "translatorscript" in request.FILES:
           try:
-            delFile(thisqn.translatorscript.path)
+            delFile(qn.translatorscript.path)
           except:
             pass
-          thisqn.translatorscript= request.FILES["translatorscript"]
+          qn.translatorscript= request.FILES["translatorscript"]
+        directupload = False
         if "directupload" in request.FILES:
           try:
-            delFile(thisqn.directupload.path)
+            delFile(qn.directupload.path)
           except:
             pass
-          thisqn.directupload= request.FILES["directupload"]
+          qn.directupload= request.FILES["directupload"]
+          directupload = True
         qn.save()
+        if directupload:
+          updateDirectUpload(qn)
         return HttpResponseRedirect(reverse("tests:questions")) 
       except Exception,e:
         codeQnForm.add_error(None,"Failed to save the form:"+str(e))
@@ -219,29 +257,33 @@ def addqns(request, testid):
         qn.save()
         if "smallscript" in request.FILES:
           try:
-            delFile(thisqn.smallscript.path)
+            delFile(qn.smallscript.path)
           except:
             pass
-          thisqn.smallscript = request.FILES["smallscript"]
+          qn.smallscript = request.FILES["smallscript"]
         if "largescript" in request.FILES:
           try:
-            delFile(thisqn.largescript.path)
+            delFile(qn.largescript.path)
           except:
             pass
-          thisqn.largescript = request.FILES["largescript"]
+          qn.largescript = request.FILES["largescript"]
         if "translatorscript" in request.FILES:
           try:
-            delFile(thisqn.translatorscript.path)
+            delFile(qn.translatorscript.path)
           except:
             pass
-          thisqn.translatorscript= request.FILES["translatorscript"]
+          qn.translatorscript= request.FILES["translatorscript"]
+        directupload = False
         if "directupload" in request.FILES:
           try:
-            delFile(thisqn.directupload.path)
+            delFile(qn.directupload.path)
           except:
             pass
-          thisqn.directupload= request.FILES["directupload"]
+          qn.directupload= request.FILES["directupload"]
+          directupload = True
         qn.save()
+        if directupload:
+          updateDirectUpload(qn)
         idx=CodeQnsList.objects.filter(testid=thistest).count()
         # add the new entry in the end
         qnentry = CodeQnsList(qn=qn,testid=thistest,seq=idx)
@@ -337,30 +379,30 @@ def editqn(request, qnid):
         except:
           pass
         thisqn.smallscript = request.FILES["smallscript"]
-        print thisqn.smallscript.path
       if "largescript" in request.FILES:
         try:
           delFile(thisqn.largescript.path)
         except:
           pass
         thisqn.largescript = request.FILES["largescript"]
-        print thisqn.largescript.path
       if "translatorscript" in request.FILES:
         try:
           delFile(thisqn.translatorscript.path)
         except:
           pass
         thisqn.translatorscript= request.FILES["translatorscript"]
-        print thisqn.largescript.path
+      directupload = False
       if "directupload" in request.FILES:
         try:
           delFile(thisqn.directupload.path)
         except:
           pass
         thisqn.directupload= request.FILES["directupload"]
-        print thisqn.largescript.path
+        directupload = True
       try:
         thisqn.save()
+        if directupload:
+          updateDirectUpload(thisqn)
         return HttpResponseRedirect(reverse("tests:questions"))
       except Exception,e:
         codeQnForm.add_error(None,"Failed to update qn")

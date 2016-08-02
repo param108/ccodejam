@@ -136,6 +136,7 @@ $('#id_needtranslator').change(needtranslator_clicked);
 <div class="directupload-div">
 <div class="fieldWrapper">
     {{ form.directupload.errors }}
+    <span>Number uploaded so far small:{{theqn.numqnsuploadedsmall}} large: {{theqn.numqnsuploadedlarge}}</span>
     <label for="{{ form.directupload.id_for_label }}">{{form.directupload.label}}</label>
     {{ form.directupload }}
     <span><em>{{form.directupload.help_text}}</em></span>
