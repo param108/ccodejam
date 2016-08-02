@@ -17,5 +17,9 @@ def getlargestatus(dictionary, key):
   val = dictionary.get(key)
   if not val:
     return None
-  print val[1].result
-  return val[1].result
+  print val
+  if len(val) == 2:
+    print val[1].result
+    return val[1].result
+  else:
+    return "No large Set for this question"

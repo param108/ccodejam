@@ -40,11 +40,12 @@ def generate_answers(attempt, qnlist):
     qnid = qn.qn.id
     ret[qnid]=[]
     smallans=Answer(testattempt=attempt, qn=qn.qn, qtype="small") 
-    largeans=Answer(testattempt=attempt, qn=qn.qn, qtype="large") 
     smallans.save()
-    largeans.save()
     ret[qnid].append(smallans)
-    ret[qnid].append(largeans)
+    if qn.qn.need2questions:
+      largeans=Answer(testattempt=attempt, qn=qn.qn, qtype="large") 
+      largeans.save()
+      ret[qnid].append(largeans)
   return ret
 
 def get_answers(attempt, qnlist):
@@ -61,12 +62,15 @@ def get_answers(attempt, qnlist):
       else:
         largeans=ans
     ret[qnid].append(smallans)
-    ret[qnid].append(largeans)
+    if qn.qn.need2questions:
+      ret[qnid].append(largeans)
   return ret
 
 def get_answers_from_qnid_size(attempt, qnid, size):
   answer = Answer.objects.filter(testattempt=attempt).filter(qn_id=qnid).filter(qtype=size)
-  return answer[0]
+  if len(answer):
+    return answer[0]
+  return None
 
 def get_answers_from_qnid(attempt, qnid):
   ret={}
@@ -80,7 +84,9 @@ def get_answers_from_qnid(attempt, qnid):
     else:
       largeans=ans
   ret[qnid].append(smallans)
-  ret[qnid].append(largeans)
+  # the smallans should exist and its question is the same as the large set
+  if smallans.qn.need2questions:
+    ret[qnid].append(largeans)
   return ret
 
 def starttest(request,testid):
@@ -147,7 +153,7 @@ def showquestion(request, attemptid, qnid):
     print("Invalid user")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   anslist = get_answers_from_qnid(thisattempt, qnidx) 
-  if anslist[qnidx][0] == None or anslist[qnidx][1] == None:
+  if anslist[qnidx][0] == None:
     print("Invalid Answers")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   return render(request,"coding/coding_qn_show.html",{"base_url":settings.BASE_URL,
@@ -192,6 +198,8 @@ def upload(request, attemptid, qnid, size):
     print("Invalid user")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   ans = get_answers_from_qnid_size(thisattempt, qnidx, size) 
+  if not ans:
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
   if ans.result=="pass":
     return HttpResponseRedirect(reverse("go:qn", args=[str(ans.testattempt.id),
                                                        str(ans.qn.id)])) 
@@ -271,9 +279,9 @@ def check_if_pass(ans):
   if rc == 0:
     ans.result="pass"
     if ans.qtype == "small":
-      ans.testattempt.score += 1
+      ans.testattempt.score += ans.qn.smallscore
     elif ans.qtype == "large":
-      ans.testattempt.score += 5
+      ans.testattempt.score += ans.qn.largescore
     return True
   else:
     ans.result="fail"
