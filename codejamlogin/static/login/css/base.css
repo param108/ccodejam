@@ -102,3 +102,13 @@ color: #ffc;
       padding-left: 10px;
       padding-right: 10px;}
 
+.user-warning{
+  margin: auto;
+  width: 50%;
+  border-style: solid;
+  border-width: 2px;
+  border-color: red;
+  border-radius: 10px;
+  padding: 10px;
+}
+

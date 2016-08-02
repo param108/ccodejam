@@ -2,6 +2,15 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User 
 from django.db import models
 from codetests.models import CodeTests,Qns
+
+class UserLock(models.Model):
+  userid = models.IntegerField(unique=True)
+  cause= models.CharField(max_length=50)
+  starttime = models.DateTimeField(auto_now_add=True) # time at which download started 
+
+class UserLockDelete(models.Model):
+  userid = models.IntegerField(unique=True)
+
 class TestAttempt(models.Model):
   user = models.ForeignKey(User)
   testid=models.ForeignKey(CodeTests)

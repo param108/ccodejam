@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<style>
+.btn {margin-top: 5px;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Lock page</h2>
+<div class="user-warning">
+<p>Oops I am sorry, you have been locked out (do you have 2 browsers open for the test?) Dont worry, just click on the link below to get started again</p>
+<p>If that doesnt work, just ping the admin: paramp@cisco.com he can unlock you.</p>
+<a href="{{return}}" class="btn btn-success">Back to the test</a>
+</div>
+</div>
+{% endblock %}

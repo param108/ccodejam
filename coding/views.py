@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from codetests.models import CodeTests,CodeQnsList
-from models import TestAttempt,Answer
+from models import TestAttempt,Answer,UserLock,UserLockDelete
 import os,time
 from codejam import settings
-import datetime
+import time,datetime
 from django.utils.timezone import is_naive
 from django.core.urlresolvers import reverse
 import pytz
@@ -12,6 +12,84 @@ from django.core.files import File
 import subprocess
 from forms import Solution
 import random
+
+# Use only with "with" clause!!!
+class Lock(object):
+  def __init__(self, user, reason):
+    self.user = user
+    self.reason = reason
+    self.lock_status = False
+    self.lid = -1
+
+  def __enter__(self):
+    print "Entering:"+self.reason
+    self.lock_user()
+    return self
+
+  def __exit__(self, type, value, tb):
+    print "Exiting:"+self.reason
+    self.unlock_user()
+
+  def unlock_user(self):
+    if self.lid > 0:
+      lid = self.lid
+      self.lid= -1
+      u = UserLock.objects.filter(pk=lid)
+      if len(u):
+        try:
+          if u[0].userid == self.user.id:
+            u[0].delete()
+            self.lock_status = False
+          else:
+            print "Trying to  DELETE wrong user!!!:"+str(u[0].id)+":"+str(self.user.id)
+          return
+        except:
+          print "FAILURE TO DELETE LOCK!!!!"
+      print "FAILURE TO FIND LOCK!!!!"
+
+  def locked(self):
+    return self.lock_status
+  # returns True if locked False if not locked
+  # returns the lock id in lock object
+  def lock_user(self):
+    u = None
+    ud = None
+    # try and get user lock
+    try:
+      u = UserLock(userid=self.user.id, cause=self.reason)
+      u.save()
+      self.lid = u.id
+      self.lock_status = True
+      return True
+    except Exception,e:
+      print ("Failed to Lock!!!!:"+ str(e))
+
+    #get the lock delete lock
+    try:
+      ud = UserLockDelete(userid=self.user.id)
+      ud.save()
+    except Exception,e:
+      print ("Failed to get Lock Delete!!!!"+str(e))
+      return False
+
+    u = UserLock.objects.filter(userid=self.user.id)
+    try:
+      # check if this is a stale lock
+      if len(u):
+        check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+        tdelta = check - u[0].starttime 
+        if tdelta.total_seconds() > 30:
+          print ("Force deleting: "+u[0].cause+" by "+self.reason)
+          u[0].delete()
+    except Exception,e:
+      print ("Failed to Delete!!!!"+str(e))
+  
+    # remember to unlock the delete lock
+    ud.delete()
+
+    # fail anyway!
+    return False 
+
 # Create your views here.
 def testpage(request):
   os.environ['TZ']="Asia/Kolkata"
@@ -57,7 +135,6 @@ def get_answers(attempt, qnlist):
     smallans = None
     largeans = None
     for ans in answers:
-      updateAnsStatus(ans)
       if ans.qtype=="small":
         smallans=ans
       else:
@@ -70,7 +147,6 @@ def get_answers(attempt, qnlist):
 def get_answers_from_qnid_size(attempt, qnid, size):
   answer = Answer.objects.filter(testattempt=attempt).filter(qn_id=qnid).filter(qtype=size)
   if len(answer) == 1:
-    updateAnsStatus(answer[0])
     return answer[0]
   return None
 
@@ -81,7 +157,6 @@ def get_answers_from_qnid(attempt, qnid):
   smallans = None
   largeans = None
   for ans in answers:
-    updateAnsStatus(ans)
     if ans.qtype=="small":
       smallans=ans
     else:
@@ -101,17 +176,30 @@ def starttest(request,testid):
   except Exception,e:
     print("Cant Find:"+str(e)) 
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
- 
+
+
   attempts = TestAttempt.objects.filter(user=request.user).filter(testid=testid)
   testattempt = None
   qnlist=CodeQnsList.objects.filter(testid=thistest)
   anslist = None
   if len(attempts) == 0:
-    testattempt=TestAttempt(user=request.user, testid=thistest)
-    testattempt.save()
-    anslist = generate_answers(testattempt, qnlist)
+    with Lock(request.user,"generation") as lock:
+      if not lock.locked():
+        return render(request,"coding/user_locked.html", {
+                                           "return":reverse("go:start",
+                                                      args=[testid])}) 
+      attempts = TestAttempt.objects.filter(user=request.user).filter(testid=testid)
+      if len(attempts) == 0:
+        testattempt=TestAttempt(user=request.user, testid=thistest)
+        testattempt.save()
+        anslist = generate_answers(testattempt, qnlist)
+    # locked till here
   else:
     testattempt=attempts[0]
+    if not updateAnsStatus(request.user, testattempt):
+      return render(request,"coding/user_locked.html", {
+                                           "return":reverse("go:start",
+                                                      args=[testid])}) 
     anslist = get_answers(testattempt, qnlist)
   return render(request,"coding/coding_qnlist_show.html",{"base_url":settings.BASE_URL,
                                                       "anslist":anslist,
@@ -155,6 +243,12 @@ def showquestion(request, attemptid, qnid):
   if request.user != thisattempt.user:
     print("Invalid user")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+
+  if not updateAnsStatus(request.user, thisattempt):
+    return render(request,"coding/user_locked.html", {
+                                         "return":reverse("go:start",
+                                                    args=[thisattempt.testid.id])}) 
+ 
   anslist = get_answers_from_qnid(thisattempt, qnidx) 
   if anslist[qnidx][0] == None:
     print("Invalid Answers")
@@ -201,13 +295,17 @@ def upload(request, attemptid, qnid, size):
   if request.user != thisattempt.user:
     print("Invalid user")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+  if not updateAnsStatus(request.user, thisattempt):
+    return render(request,"coding/user_locked.html", {
+                                         "return":reverse("go:start",
+                                                    args=[thisattempt.testid.id])}) 
   ans = get_answers_from_qnid_size(thisattempt, qnidx, size) 
   if not ans:
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
   if ans.result=="pass":
     return HttpResponseRedirect(reverse("go:qn", args=[str(ans.testattempt.id),
                                                        str(ans.qn.id)])) 
-    
+
   if request.method == "GET":
     return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
                                                             "ans":ans, "form":Solution(),
@@ -222,33 +320,46 @@ def dnload(request, ansid, size):
   if ansidx < 0:
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   ans = None
-  try:
-    ans = Answer.objects.get(pk=ansidx)
-  except Exception,e:
-    print("Cant Find:"+str(e)) 
-    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-  if request.user != ans.testattempt.user:
-    print("Invalid user")
-    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-  check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-  if not ans.endtime or check > ans.endtime:
-    ans.attempt+=1
-    random.seed()
-    r = random.randint(1,ans.testattempt.testid.qnsgenerated)
-    get_new_sol_files(ans, r)  
+  with Lock(request.user, "dnload") as lock:
+    try:
+      ans = Answer.objects.get(pk=ansidx)
+    except Exception,e:
+      print("Cant Find:"+str(e)) 
+      return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+    if request.user != ans.testattempt.user:
+      print("Invalid user")
+      return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+    if not lock.locked():
+      return render(request,"coding/user_locked.html", {
+                                         "return":reverse("go:start",
+                                         args=[ans.testattempt.testid.id])}) 
+    check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+    if not ans.endtime or check > ans.endtime:
+      ans.attempt+=1
+      random.seed()
+      r = random.randint(1,ans.testattempt.testid.qnsgenerated)
+      get_new_sol_files(ans, r)  
+    # locked till here
   qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"q.txt"
   #ans.qnset.open()
   fp = open(qnpath,'r')
   return HttpResponse(fp.read(),content_type="text/plain")
 
-def updateAnsStatus(ans):
-  if ans.result == "in-progress":
-    check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-    if not ans.endtime or check > ans.endtime:
-        ans.result = "fail"
-        ans.attempt += 1
-        ans.endtime = None
-        ans.save()
+def updateAnsStatus(user, attempt):
+  for ans in Answer.objects.filter(testattempt=attempt).filter(result="in-progress"):
+    with Lock(user, "updateAnsStatus") as lock:
+      if lock.locked():
+        answers = Answer.objects.filter(pk=ans.id)
+        if len(answers):
+          check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+          if not ans.endtime or check > ans.endtime:
+            ans.result = "fail"
+            ans.attempt += 1
+            ans.endtime = None
+            ans.save()
+        return True
+      return False
+  return True
       
  
 def uploadtime(request, ansid):
@@ -304,30 +415,44 @@ def uploadfile(request, ansid):
   if ansidx < 0:
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   ans = None
-  try:
-    ans = Answer.objects.get(pk=ansidx)
-  except Exception,e:
-    print("Cant Find:"+str(e)) 
-    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-  if request.user != ans.testattempt.user:
-    print("Invalid user")
-    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-  # FIXME should actually be a random number
-  check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-  if not ans.endtime or check > ans.endtime or ans.result=="pass":
-    return HttpResponseRedirect(settings.BASE_URL+"/go/uploadsolution/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
-  if request.method == "POST":
-    solform = Solution(request.POST, request.FILES)
-    if solform.is_valid(): 
-      ans.uploadtime=check
-      ans.ans = request.FILES["solution"]
-      ans.codefile = request.FILES["code"]
-      ans.save()
-      if check_if_pass(ans):
-        ans.testattempt.save()
-      ans.save()
-    else:
-      return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+  with Lock(request.user, "uploadfile") as lock:
+    try:
+      ans = Answer.objects.get(pk=ansidx)
+    except Exception,e:
+      print("Cant Find:"+str(e)) 
+      return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+    if request.user != ans.testattempt.user:
+      print("Invalid user")
+      return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+ 
+    if ans.result == "pass":
+      return HttpResponseRedirect(settings.BASE_URL+"/go/question/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
+    # need the testid for the warning page so moving it here
+    if request.method == "POST":
+      if not lock.locked():
+        return render(request,"coding/user_locked.html", {
+                                     "return":reverse("go:start",
+                                     args=[ans.testattempt.testid.id])}) 
+ 
+      check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+      if not ans.endtime or check > ans.endtime:
+        solform.add_error(None,"Time Out: Please Reload and Try again. Please note the input file will change on Reload")
+        return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+                                                            "ans":ans, "form":solform,
+                                                            "return":reverse("go:qn", 
+                                                               args=[str(ans.testattempt.id),
+                                                               str(ans.qn.id)])})
+      solform = Solution(request.POST, request.FILES)
+      if solform.is_valid(): 
+        ans.uploadtime=check
+        ans.ans = request.FILES["solution"]
+        ans.codefile = request.FILES["code"]
+        ans.save()
+        if check_if_pass(ans):
+          ans.testattempt.save()
+        ans.save()
+      else:
+        return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
                                                             "ans":ans, "form":solform,
                                                             "return":reverse("go:qn", 
                                                                args=[str(ans.testattempt.id),
