@@ -12,6 +12,7 @@ class UserLockDelete(models.Model):
   userid = models.IntegerField(unique=True)
 
 class TestAttempt(models.Model):
+  version= models.IntegerField(default=0)
   user = models.ForeignKey(User)
   testid=models.ForeignKey(CodeTests)
   start= models.DateTimeField(auto_now_add=True)

@@ -210,15 +210,15 @@ def starttest(request,testid):
 def timeremaining(request, testid):
   if int(testid) < 0:
     return  JsonResponse({"status": -1}) 
-  thistest = None
+  attempt = None
   try:
-    thistest = CodeTests.objects.get(pk=int(testid))
+    attempt = TestAttempt.objects.get(pk=int(testid))
   except Exception,e:
     print("Cant Find:"+str(e)) 
     return  JsonResponse({"status": -1}) 
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-  if check < thistest.end:
-    td = thistest.end - check
+  if check < attempt.testid.end:
+    td = attempt.testid.end - check
     totalsecs = td.total_seconds()
     hrs = totalsecs/3600
     secs = totalsecs%3600
@@ -226,7 +226,8 @@ def timeremaining(request, testid):
     secs = secs % 60
     timestr="%02d:%02d:%02d"%(hrs, mins, secs)
     return JsonResponse({"status":0,
-                         "time":timestr});
+                         "time":timestr,
+                         "version":attempt.version});
   return  JsonResponse({"status": -1}) 
 
 def showquestion(request, attemptid, qnid):
@@ -339,6 +340,8 @@ def dnload(request, ansid, size):
       random.seed()
       r = random.randint(1,ans.testattempt.testid.qnsgenerated)
       get_new_sol_files(ans, r)  
+      ans.testattempt.version+=1
+      ans.testattempt.save()
     # locked till here
   qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"q.txt"
   #ans.qnset.open()
@@ -357,6 +360,8 @@ def updateAnsStatus(user, attempt):
             ans.attempt += 1
             ans.endtime = None
             ans.save()
+            attempt.version+= 1
+            attempt.save()
         return True
       return False
   return True
@@ -384,7 +389,8 @@ def uploadtime(request, ansid):
     timestr="%02d:%02d"%(mins, secs)
     return JsonResponse({"status":0,
                          "time":timestr,
-                         "attemptnum":ans.attempt});
+                         "attemptnum":ans.attempt,
+                         "version":ans.testattempt.version});
  # timeout code is 2
   return  JsonResponse({"status": 2}) 
 
@@ -448,8 +454,9 @@ def uploadfile(request, ansid):
         ans.ans = request.FILES["solution"]
         ans.codefile = request.FILES["code"]
         ans.save()
-        if check_if_pass(ans):
-          ans.testattempt.save()
+        check_if_pass(ans)
+        ans.testattempt.version+=1
+        ans.testattempt.save()
         ans.save()
       else:
         return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,

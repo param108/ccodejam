@@ -3,10 +3,16 @@
 {% load staticfiles %}
 {% load coding_extras %}
 <script type="text/javascript">
+var attemptver = {{ans.testattempt.version}};
 function tick() {
  $.ajax({url:"{{base_url}}/go/uploadtime/{{ans.id}}/",
          success:function(data) {
            if (data.status == 0) {
+             if (attemptver == -1) {
+               attemptver = parseInt(data.version);
+             } else if (attemptver != parseInt(data.version)) {
+               location.reload(true);
+             }
              $("#timeremaining").html(data.time);
              $("#attemptnum").html(data.attemptnum);
            } else if (data.status == 2) {
