@@ -12,9 +12,11 @@ import sys
 from django.core.wsgi import get_wsgi_application
 import datetime, time
 
-sys.path.append('/nobackup/paramp/django/sw/packages/python/current/lib/python2.7/site-packages')
-sys.path.append('/var/lib/jenkins/workspace/CodeJam/')
-sys.path.append('/var/lib/jenkins/workspace/CodeJam/codejam/')
+os.environ['PYTHON_EGG_CACHE'] = '/var/lib/codejam/python-eggs'
+sys.path.append('/sw/packages/python/2.7.10/lib/python2.7/site-packages/')
+sys.path.append('/var/lib/codejam/usr/lib/python2.7/site-packages')
+sys.path.append('/var/lib/codejam/codejam')
+sys.path.append('/var/lib/codejam/codejam/codejam')
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "codejam.settings"
 
