@@ -409,7 +409,7 @@ def uploadtime(request, ansid):
                          "attemptnum":ans.attempt,
                          "version":ans.testattempt.version});
  # timeout code is 2
-  if ans.result == "in-progress":
+  if ans.result == "in-progress" or ans.result == "pass":
     return  JsonResponse({"status": 2}) 
   return  JsonResponse({"status": -1}) 
 
