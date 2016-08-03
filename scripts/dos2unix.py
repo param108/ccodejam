@@ -21,4 +21,5 @@ data = data.replace("\r\n","\n")
 if data[-1] != "\n":
   data += "\n"
 op.write(data)
+op.close()
 subprocess.check_output(["mv",path,sys.argv[1]])
