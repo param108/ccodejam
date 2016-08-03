@@ -130,6 +130,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 MEDIA_URL="/media/"
+DNLD_URL="/media"
 BASE_URL=""
 MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
 TAR="/bin/tar"

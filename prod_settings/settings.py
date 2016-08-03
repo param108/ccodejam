@@ -134,14 +134,15 @@ AUTHENTICATION_BACKENDS = [
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-MEDIA_ROOT='/nobackup/paramp/codejam'
+MEDIA_ROOT='/var/lib/codejam/media'
 MEDIA_URL='/codejamdata/'
+DNLD_URL='/codejamdnld'
 # For Prod
 # BASE_URL="codejam/"
 LOGIN_URL=BASE_URL + "/login/"
 LOGIN_REDIRECT_URL=BASE_URL + "/login/"
 DIFF="/usr/bin/diff"
-PYTHON="/nobackup/paramp/django/bin/python"
+PYTHON="/sw/packages/python/2.7.10/bin/python2.7"
 
 DOS2UNIX=os.path.join(BASE_DIR,'scripts/dos2unix.py')
 DIRECTUPLOAD=os.path.join(BASE_DIR,'scripts/direct_upload.py')

@@ -323,6 +323,7 @@ def upload(request, attemptid, qnid, size):
 
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def dnload(request, ansid, size):
+  changed = False
   if size != "small" and size != "large":
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
   ansidx = int(ansid)
@@ -348,13 +349,20 @@ def dnload(request, ansid, size):
       random.seed()
       r = random.randint(1,ans.testattempt.testid.qnsgenerated)
       get_new_sol_files(ans, r)  
+      changed=True
       ans.testattempt.version+=1
       ans.testattempt.save()
     # locked till here
   qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"q.txt"
   #ans.qnset.open()
-  fp = open(qnpath,'r')
-  return HttpResponse(fp.read(),content_type="text/plain")
+  dnloadlink = str(ans.testattempt.testid.id)+"_"+str(ans.qn.id)+"_"+ans.qtype
+  if changed:
+    try:
+      os.remove(settings.MEDIA_ROOT+"/dnload/"+dnloadlink)
+    except:
+      pass
+    os.symlink(qnpath, settings.MEDIA_ROOT+"/dnload/"+dnloadlink)
+  return HttpResponseRedirect(settings.DNLD_URL+"/"+dnloadlink)
 
 def updateAnsStatus(user, attempt):
   for ans in Answer.objects.filter(testattempt=attempt).filter(result="in-progress"):
