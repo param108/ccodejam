@@ -154,7 +154,7 @@ $('#id_needtranslator').change(needtranslator_clicked);
 <div class="fieldWrapper">
     {{ form.smallscript.errors }}
     <label for="{{ form.smallscript.id_for_label }}">{{form.smallscript.label}}</label>
-    <a href="{{base_url}}/{{theqn.id}}/small/">Uploaded File</a>
+    <a href="{{base_url}}/viewfile/{{theqn.id}}/small/">Uploaded File</a>
     {{ form.smallscript }}
     <span><em>{{form.smallscript.help_text}}</em></span>
 </div>
@@ -192,7 +192,7 @@ $('#id_needtranslator').change(needtranslator_clicked);
 <div class="fieldWrapper">
     {{ form.largescript.errors }}
     <label for="{{ form.largescript.id_for_label }}">{{form.largescript.label}}</label>
-    <a href="{{base_url}}/{{theqn.id}}/large/">Uploaded File</a>
+    <a href="{{base_url}}/viewfile/{{theqn.id}}/large/">Uploaded File</a>
     {{ form.largescript }}
     <span><em>{{form.largescript.help_text}}</em></span>
 </div>
