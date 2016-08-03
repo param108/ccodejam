@@ -11,6 +11,7 @@ from django.http import JsonResponse,HttpResponse,HttpResponseRedirect
 from django.core.files import File
 import subprocess
 from forms import Solution
+from django.contrib.auth.decorators import login_required
 import random
 
 # Use only with "with" clause!!!
@@ -91,6 +92,7 @@ class Lock(object):
     return False 
 
 # Create your views here.
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def testpage(request):
   os.environ['TZ']="Asia/Kolkata"
   time.tzset()
@@ -167,6 +169,7 @@ def get_answers_from_qnid(attempt, qnid):
     ret[qnid].append(largeans)
   return ret
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def starttest(request,testid):
   if int(testid) < 0:
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
@@ -207,6 +210,7 @@ def starttest(request,testid):
                                                       "attempt":testattempt,
                                           "return":reverse("go:tests")})
                                     
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def timeremaining(request, testid):
   if int(testid) < 0:
     return  JsonResponse({"status": -1}) 
@@ -230,6 +234,7 @@ def timeremaining(request, testid):
                          "version":attempt.version});
   return  JsonResponse({"status": -1}) 
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def showquestion(request, attemptid, qnid):
   qnidx = int(qnid)
   attemptidx = int(attemptid)
@@ -280,6 +285,7 @@ def get_new_sol_files(ans, num):
   ans.result="in-progress"
   ans.save()
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def upload(request, attemptid, qnid, size):
   if size != "small" and size != "large":
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
@@ -314,6 +320,7 @@ def upload(request, attemptid, qnid, size):
                                                                args=[str(ans.testattempt.id),
                                                                str(ans.qn.id)])})
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def dnload(request, ansid, size):
   if size != "small" and size != "large":
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/"))
@@ -367,6 +374,7 @@ def updateAnsStatus(user, attempt):
   return True
       
  
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def uploadtime(request, ansid):
   ansidx = int(ansid)
   if ansidx < 0:
@@ -416,6 +424,7 @@ def check_if_pass(ans):
     ans.result="fail"
     return False
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def uploadfile(request, ansid):
   ansidx = int(ansid)
   if ansidx < 0:

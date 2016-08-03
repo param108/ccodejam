@@ -9,7 +9,10 @@ from django.core.urlresolvers import reverse
 from codejam import settings
 import subprocess, re
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.admin.views.decorators import staff_member_required
+
 # Create your views here.
+@staff_member_required
 def show(request):
   os.environ['TZ']="Asia/Kolkata"
   time.tzset()
@@ -78,6 +81,7 @@ def renumberDirectUploads(qn, qtype):
   renumberfiles(present)    
   return len(present)
 
+@staff_member_required
 def questions(request):
   codeQnForm = CodeQnForm()
   if request.method == "POST":
@@ -128,6 +132,7 @@ def questions(request):
                                                           "base_url":settings.BASE_URL})
 
 
+@staff_member_required
 def delete(request,testid):
   # we are going back to show to avoid an infinite redirect loop
   # to edit
@@ -145,6 +150,7 @@ def delete(request,testid):
     print("Cant Delete:"+str(e)) 
   return HttpResponseRedirect(reverse("tests:show")) 
  
+@staff_member_required
 def edit(request,testid):
   if int(testid) < 0:
     return HttpResponseRedirect(reverse("tests:show")) 
@@ -239,6 +245,7 @@ def copy_qn(qn):
          "difficulty":qn.difficulty})
   return qn
  
+@staff_member_required
 def addqns(request, testid):
   if int(testid) < 0:
     return HttpResponseRedirect(reverse("tests:show")) 
@@ -303,6 +310,7 @@ def addqns(request, testid):
                                                           "form": codeQnForm, "tid":thistest.id,
                                                           "base_url":settings.BASE_URL})
 
+@staff_member_required
 @csrf_exempt
 def linkqn(request, testid):
   if int(testid) < 0:
@@ -328,6 +336,7 @@ def linkqn(request, testid):
   except:
     return JsonResponse({"success":-1}) 
 
+@staff_member_required
 @csrf_exempt
 def unlinkqn(request, testid):
   if int(testid) < 0:
@@ -357,6 +366,7 @@ def delFile(p):
     # do nothing if we cant delete it
     pass
 
+@staff_member_required
 def editqn(request, qnid):
   if int(qnid) < 0:
     return HttpResponseRedirect(reverse("tests:show")) 
@@ -411,6 +421,7 @@ def editqn(request, qnid):
                                                           "form": codeQnForm,
                                                           "base_url":settings.BASE_URL}) 
 
+@staff_member_required
 def viewfile(request, qnid, size):
   if size != "small" and size != "large":
     return HttpResponseNotFound("<h1>Not Found</h1>")
@@ -437,6 +448,7 @@ def viewfile(request, qnid, size):
                                                      "title":title,
                                                      "base_url":settings.BASE_URL}) 
    
+@staff_member_required
 def generate(request, testid):
   thistest = None
   try:
