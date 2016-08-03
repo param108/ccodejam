@@ -409,7 +409,9 @@ def uploadtime(request, ansid):
                          "attemptnum":ans.attempt,
                          "version":ans.testattempt.version});
  # timeout code is 2
-  return  JsonResponse({"status": 2}) 
+  if ans.result == "in-progress":
+    return  JsonResponse({"status": 2}) 
+  return  JsonResponse({"status": -1}) 
 
 def check_if_pass(ans):
   solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"a.txt"
