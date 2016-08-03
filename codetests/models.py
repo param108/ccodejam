@@ -59,6 +59,11 @@ class Qns(models.Model):
   difficulty=models.IntegerField(default=1)
   largescore=models.IntegerField(default=5, null=True)
   smallscore=models.IntegerField(default=2) 
+  # languages will be C Python
+  language=models.CharField(max_length=20, default="any", choices=(
+                                          ("any","any"),
+                                          ("C","C"),
+                                          ("Python","Python")))
 
 # Create your models here.
 class CodeTests(models.Model):

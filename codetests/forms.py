@@ -42,6 +42,10 @@ class CodeQnForm(forms.Form):
   translatorscript=forms.FileField(required=False, label="script to translate the submitted answer set before comparison with the solution set")
   largescore=forms.IntegerField(required=False, label="score to give for the large question")
   smallscore=forms.IntegerField(label="score to give for the small question")
+  language=forms.ChoiceField(label="Which language should the user write in?",
+                             choices=(("any","any"),
+                                      ("C","C"),
+                                      ("Python","Python")), help_text="C,Python, any") 
 
 
 class GenerateForm(forms.Form):

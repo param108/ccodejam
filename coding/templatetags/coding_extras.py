@@ -23,3 +23,14 @@ def getlargestatus(dictionary, key):
     return val[1].result
   else:
     return "No large Set for this question"
+
+@register.filter
+def getFtype(lang):
+  if lang == "C":
+    return "C" 
+  if lang == "Python":
+    return "Python"
+  if lang == "any":
+    return "C or Python"
+  return "Unknown"
+

@@ -259,12 +259,13 @@ def showquestion(request, attemptid, qnid):
   if anslist[qnidx][0] == None:
     print("Invalid Answers")
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
-  return render(request,"coding/coding_qn_show.html",{"base_url":settings.BASE_URL,
-                                                      "anslist":anslist,
-                                                      "qn":anslist[qnidx][0].qn,
-                                                      "attempt":thisattempt,
-                                           "return":reverse("go:start",
-                                                      args=[thisattempt.testid.id])}) 
+  return render(request,"coding/coding_qn_show.html",{
+                     "base_url":settings.BASE_URL,
+                     "anslist":anslist,
+                     "qn":anslist[qnidx][0].qn,
+                     "attempt":thisattempt,
+                     "return":reverse("go:start",
+                        args=[thisattempt.testid.id])}) 
 
 def get_new_sol_files(ans, num):
   # files will be 1q (qns) 1a (soln)
@@ -424,6 +425,38 @@ def check_if_pass(ans):
     ans.result="fail"
     return False
 
+def valid_filetype(lang):
+  if lang == "C":
+    return "C" 
+  if lang == "Python":
+    return "Python"
+  if lang == "any":
+    return "C or Python"
+  return None
+
+
+def valid_suffix(lang):
+  if lang == "C":
+    return ".c" 
+  if lang == "Python":
+    return ".py"
+  if lang == "any":
+    return ".c or .py"
+  return None
+
+
+def is_valid_language(lang, fname):
+  if lang == "C":
+    if fname.endswith(".c"):
+      return True
+  if lang == "Python":
+    if fname.endswith(".py"):
+      return True
+  if lang == "any":
+    if fname.endswith(".py") or fname.endswith(".c"):
+      return True
+  return False
+
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def uploadfile(request, ansid):
   ansidx = int(ansid)
@@ -458,7 +491,18 @@ def uploadfile(request, ansid):
                                                                args=[str(ans.testattempt.id),
                                                                str(ans.qn.id)])})
       solform = Solution(request.POST, request.FILES)
-      if solform.is_valid(): 
+      if solform.is_valid() : 
+        if not is_valid_language(ans.qn.language, request.FILES["code"].name):
+          solform.add_error(None, 
+            "Please upload a %s file. i.e a file with %s suffix."%(
+            valid_filetype(ans.qn.language),valid_suffix(ans.qn.language)))
+          return render(request, "coding/coding_upload_files.html",{
+                             "base_url": settings.BASE_URL,
+                             "ans":ans, "form":solform,
+                             "return":reverse("go:qn", 
+                                args=[str(ans.testattempt.id),
+                                str(ans.qn.id)])})
+ 
         ans.uploadtime=check
         ans.ans = request.FILES["solution"]
         ans.codefile = request.FILES["code"]

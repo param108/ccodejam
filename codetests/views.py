@@ -198,6 +198,7 @@ def update_qn(qn, qnform):
   qn.inputexample=_fg(qnform,"inputexample")
   qn.outputexample=_fg(qnform,"outputexample")
   qn.utimesmall=_fg(qnform,"utimesmall")
+  qn.language=_fg(qnform,"language")
   qn.utimelarge=_fg(qnform,"utimelarge")
   qn.largescore=_fg(qnform,"largescore")
   qn.smallscore=_fg(qnform,"smallscore")
@@ -221,6 +222,7 @@ def save_qn(qnform):
          utimelarge=_fg(qnform,"utimelarge"),
          largescore=_fg(qnform,"largescore"),
          smallscore=_fg(qnform,"smallscore"),
+         language=_fg(qnform,"language"),
          #smallscript=rfiles["smallscript"],
          #largescript=rfiles["largescript"],
          difficulty=_fg(qnform,"difficulty"))
@@ -238,6 +240,7 @@ def copy_qn(qn):
          "inputexample":qn.inputexample,
          "outputexample":qn.outputexample,
          "utimesmall":qn.utimesmall,
+         "language":qn.language,
          "largescore":qn.largescore,
          "smallscore":qn.smallscore,
          #smallscript:rfiles["qn.smallscript"],

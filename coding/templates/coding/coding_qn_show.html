@@ -40,6 +40,7 @@ $(document).ready(function() {
 <h3>Question: {{qn.title}}</h3>
 <span>Small Set Status: </span><span class="{{anslist|getsmallstatus:qn.id}}">{{anslist|getsmallstatus:qn.id}}</span><br>
 <span>Large Set Status: </span><span class="{{anslist|getlargestatus:qn.id}}">{{anslist|getlargestatus:qn.id}}</span>
+<h2 class="language-h2" >Language: {{qn.language|getFtype}}</h2>
 <h2>Description</h2>
 <pre>{{qn.description}}</pre>
 <h2>Limits (small set)</h2>

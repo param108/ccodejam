@@ -41,6 +41,7 @@ $(document).ready(function() {
 <tr class="row">
 <th>S.No</th>
 <th>Qn Name</th>
+<th>Language</th>
 <th>Small Set Status</th>
 <th>Large Set Status</th>
 <th>Actions</th>
@@ -49,6 +50,7 @@ $(document).ready(function() {
 <tr class="row">
 <td>{{forloop.counter}}</td>
 <td>{{qn.qn.title}}</td>
+<td>{{qn.qn.language|getFtype}}</td>
 <td class="{{anslist|getsmallstatus:qn.qn.id}}">{{anslist|getsmallstatus:qn.qn.id}}</td>
 <td class="{{anslist|getlargestatus:qn.qn.id}}">{{anslist|getlargestatus:qn.qn.id}}</td>
 <td><a class="btn btn-success" href="{{base_url}}/go/question/{{attempt.id}}/{{qn.qn.id}}/">Attempt</a></td>
