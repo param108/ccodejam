@@ -465,6 +465,16 @@ def is_valid_language(lang, fname):
       return True
   return False
 
+def saveSolNum(ans):
+  solnumfilename = settings.MEDIA_ROOT+"/ans/"+str(ans.testattempt.user.id)+"/"+str(ans.id)+"/"+ans.qtype+"/"+str(ans.attempt)
+  try: 
+    os.makedirs(solnumfilename)
+  except:
+    pass
+  fp = open(solnumfilename+"/solnum.txt","w")
+  fp.write(str(ans.solnum)+"\n");
+  fp.close()
+ 
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def uploadfile(request, ansid):
   ansidx = int(ansid)
@@ -515,6 +525,7 @@ def uploadfile(request, ansid):
         ans.ans = request.FILES["solution"]
         ans.codefile = request.FILES["code"]
         ans.save()
+        saveSolNum(ans)
         check_if_pass(ans)
         ans.testattempt.version+=1
         ans.testattempt.save()
