@@ -27,7 +27,7 @@ def show(request):
       print(qnform.cleaned_data["datetimefield"])
       hidden = False
       if "hidden" in qnform.cleaned_data:
-        hidden = True
+        hidden = qnform.cleaned_data["hidden"]
       newtest = CodeTests(testname = qnform.cleaned_data["testname"],
                         start = qnform.cleaned_data["datetimefield"],
                         duration = qnform.cleaned_data["duration"],
@@ -165,7 +165,7 @@ def edit(request,testid):
     return HttpResponseRedirect(reverse("tests:show")) 
  
   if request.method == "GET":
-    tform = CodeTestForm(initial={"testname":thistest.testname, "datetimefield":thistest.start, "duration":thistest.duration}) 
+    tform = CodeTestForm(initial={"testname":thistest.testname, "datetimefield":thistest.start, "duration":thistest.duration, "hidden":thistest.hidden}) 
     return render(request, "codetests/codetests_edit.html",{ "form": tform, "tid":testid,
                                                              "base_url":settings.BASE_URL})
   # POST handling
@@ -174,6 +174,10 @@ def edit(request,testid):
     thistest.testname = tform.cleaned_data["testname"]
     thistest.start = tform.cleaned_data["datetimefield"]
     thistest.duration = tform.cleaned_data["duration"]
+    if "hidden" in tform.cleaned_data:
+      thistest.hidden = tform.cleaned_data["hidden"]
+    else:
+      thistest.hidden = False
     thistest.end = thistest.start + datetime.timedelta(hours=thistest.duration)
     try:
       thistest.save()
