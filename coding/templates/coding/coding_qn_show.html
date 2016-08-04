@@ -14,7 +14,10 @@ function tick() {
                location.reload(true);
              }
              $("#timeremaining").html(data.time);
+           } else if (data.status == -1) {
+             window.location.replace("{{base_url}}/go/tests/");
            }
+
            setTimeout(tick, 30000);
          },
          error:function(data) {

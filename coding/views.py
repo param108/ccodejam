@@ -315,7 +315,8 @@ def upload(request, attemptid, qnid, size):
                                                        str(ans.qn.id)])) 
 
   if request.method == "GET":
-    return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+    return render(request, "coding/coding_upload_files.html",{"random":str(random.randint(0,10000)),
+                                                            "base_url": settings.BASE_URL,
                                                             "ans":ans, "form":Solution(),
                                                             "return":reverse("go:qn", 
                                                                args=[str(ans.testattempt.id),
@@ -398,7 +399,7 @@ def uploadtime(request, ansid):
     return  JsonResponse({"status": -1}) 
   
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-  if check < ans.endtime:
+  if check < ans.endtime and ans.result == "in-progress":
     td = ans.endtime - check
     totalsecs = td.total_seconds()
     mins = totalsecs/60
@@ -483,11 +484,15 @@ def uploadfile(request, ansid):
   if ansidx < 0:
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   ans = None
+ 
+  check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   with Lock(request.user, "uploadfile") as lock:
     try:
       ans = Answer.objects.get(pk=ansidx)
     except Exception,e:
       print("Cant Find:"+str(e)) 
+      return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+    if check >= ans.testattempt.testid.end:
       return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
     if request.user != ans.testattempt.user:
       print("Invalid user")
@@ -502,21 +507,22 @@ def uploadfile(request, ansid):
                                      "return":reverse("go:start",
                                      args=[ans.testattempt.testid.id])}) 
  
-      check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-      if not ans.endtime or check > ans.endtime:
-        solform.add_error(None,"Time Out: Please Reload and Try again. Please note the input file will change on Reload")
-        return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
+      solform = Solution(request.POST, request.FILES)
+      if solform.is_valid() : 
+        if not ans.endtime or check > ans.endtime:
+          solform.add_error(None,"Time Out: Please Reload and Try again. Please note the input file will change on Reload")
+          return render(request, "coding/coding_upload_files.html",{"random": str(random.randint(1,10000)),"base_url": settings.BASE_URL,
                                                             "ans":ans, "form":solform,
                                                             "return":reverse("go:qn", 
                                                                args=[str(ans.testattempt.id),
                                                                str(ans.qn.id)])})
-      solform = Solution(request.POST, request.FILES)
-      if solform.is_valid() : 
+
         if not is_valid_language(ans.qn.language, request.FILES["code"].name):
           solform.add_error(None, 
-            "Please upload a %s file. i.e a file with %s suffix."%(
+            "Please upload a %s file in code below. i.e a file with %s suffix."%(
             valid_filetype(ans.qn.language),valid_suffix(ans.qn.language)))
           return render(request, "coding/coding_upload_files.html",{
+                             "random":str(random.randint(1,10000)),
                              "base_url": settings.BASE_URL,
                              "ans":ans, "form":solform,
                              "return":reverse("go:qn", 
@@ -533,11 +539,13 @@ def uploadfile(request, ansid):
         ans.testattempt.save()
         ans.save()
       else:
-        return render(request, "coding/coding_upload_files.html",{"base_url": settings.BASE_URL,
-                                                            "ans":ans, "form":solform,
-                                                            "return":reverse("go:qn", 
-                                                               args=[str(ans.testattempt.id),
-                                                               str(ans.qn.id)])})
+        return render(request, "coding/coding_upload_files.html",{
+                                       "random": str(random.randint(1, 100000)),
+                                       "base_url": settings.BASE_URL,
+                                       "ans":ans, "form":solform,
+                                       "return":reverse("go:qn", 
+                                                 args=[str(ans.testattempt.id),
+                                                       str(ans.qn.id)])})
   return HttpResponseRedirect(settings.BASE_URL+"/go/question/"+str(ans.testattempt.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/")
 
 
