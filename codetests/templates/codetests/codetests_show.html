@@ -69,6 +69,11 @@ $(document).ready(function() {
     <label for="{{ form.duration.id_for_label }}">Duration of the test (hours):</label>
     {{ form.duration }}
 </div>
+<div class="fieldWrapper">
+    {{ form.hidden.errors }}
+    <label for="{{ form.hidden.id_for_label }}">Is this test hidden:</label>
+    {{ form.hidden }}
+</div>
 <input class="btn btn-success fieldSubmit" type="submit" value="Submit" />
 </div>
 </form>

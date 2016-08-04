@@ -99,7 +99,11 @@ def testpage(request):
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   # valid optimizes the number of records retrieved by
   # avoiding tests have ended already
-  tests = CodeTests.objects.filter(end__gte=check).filter(start__lte=check);
+  tests = None
+  if request.user.is_staff:
+    tests = CodeTests.objects.filter(end__gte=check).filter(start__lte=check);
+  else:
+    tests = CodeTests.objects.filter(end__gte=check).filter(start__lte=check).filter(hidden=False);
   resume={}
   for testid in tests:
     attempts = TestAttempt.objects.filter(user=request.user).filter(testid=testid).count()
@@ -180,7 +184,8 @@ def starttest(request,testid):
     print("Cant Find:"+str(e)) 
     return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
 
-
+  if thistest.hidden and not request.user.is_staff:
+    return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
   attempts = TestAttempt.objects.filter(user=request.user).filter(testid=testid)
   testattempt = None
   qnlist=CodeQnsList.objects.filter(testid=thistest)

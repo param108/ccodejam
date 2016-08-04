@@ -72,6 +72,7 @@ class CodeTests(models.Model):
   end=models.DateTimeField(null=True)
   duration=models.IntegerField()
   valid=models.BooleanField(default=True)
+  hidden=models.BooleanField(default=False)
   # whether we are presently generating answer sets
   qnsgenerated=models.IntegerField(default=0)
   # NOTSTARTED, AWAITING, STARTED, DONE, ERRORED

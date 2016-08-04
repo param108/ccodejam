@@ -25,9 +25,13 @@ def show(request):
   if qnform.is_valid():
     try:
       print(qnform.cleaned_data["datetimefield"])
+      hidden = False
+      if "hidden" in qnform.cleaned_data:
+        hidden = True
       newtest = CodeTests(testname = qnform.cleaned_data["testname"],
                         start = qnform.cleaned_data["datetimefield"],
-                        duration = qnform.cleaned_data["duration"])
+                        duration = qnform.cleaned_data["duration"],
+                        hidden = hidden)
       newtest.end = newtest.start + datetime.timedelta(hours=newtest.duration)
       newtest.save()
       return HttpResponseRedirect(reverse("tests:edit",args=[newtest.id])) 
