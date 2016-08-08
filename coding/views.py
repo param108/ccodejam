@@ -345,12 +345,14 @@ def dnload(request, ansid, size):
     if request.user != ans.testattempt.user:
       print("Invalid user")
       return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
+    if ans.result == "pass":
+      return HttpResponseRedirect(reverse(settings.BASE_URL+"/go/tests/")) 
     if not lock.locked():
       return render(request,"coding/user_locked.html", {
                                          "return":reverse("go:start",
                                          args=[ans.testattempt.testid.id])}) 
     check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
-    if not ans.endtime or check > ans.endtime:
+    if (ans.result == "unattempted") or (ans.result=="in-progress" and check > ans.endtime) or (ans.result=="fail"):
       ans.attempt+=1
       random.seed()
       r = random.randint(1,ans.testattempt.testid.qnsgenerated)
