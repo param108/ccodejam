@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#id_start").datetimepicker({ format:'YYYY-MM-DD' });
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Projects Batch</h2>
+</div>
+<h3>Batch Information</h3>
+<div class="batch-list">
+<form action="{{url}}" method="post">
+{% csrf_token %}
+<div class="batch-input">
+{{ form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ form.batchname.errors }}
+    <label for="{{ form.batchname.id_for_label }}">Batch Name:</label>
+    {{ form.batchname }}
+</div>
+<div class="fieldWrapper">
+    {{ form.numreadouts.errors }}
+    <label for="{{ form.numreadouts.id_for_label }}">Number of readouts</label>
+    {{ form.numreadouts}}
+</div>
+<div class="fieldWrapper">
+    {{ form.start.errors }}
+    <label for="{{ form.start.id_for_label }}">Date for the first readout</label>
+    {{ form.start}}
+</div>
+<div class="fieldWrapper">
+    {{ form.interval.errors }}
+    <label for="{{ form.interval.id_for_label }}">Interval (weeks)</label>
+    {{ form.interval}}
+</div>
+<div class="checkBoxWrapper">
+    {{ form.inputopen.errors }}
+    <label for="{{ form.inputopen.id_for_label }}">Can projects be updated?</label>
+    {{ form.inputopen }}
+</div>
+<div class="checkBoxWrapper">
+    {{ form.showdashboard.errors }}
+    <label for="{{ form.showdashboard.id_for_label }}">Is the dashboard visible?</label>
+    {{ form.showdashboard}}
+</div>
+<input class="btn btn-info" type="submit" value="Save"/>
+</form>
+</div>
+</div>
+{% endblock %}

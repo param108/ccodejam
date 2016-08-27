@@ -15,20 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.conf.urls import url, include
-from codejamlogin import views as codejamloginviews
-from codejam import settings
-import os
-os.environ['TZ']="Asia/Kolkata"
-
+from projects import views
 urlpatterns = [
-    url(r'^static/(?P<path>.*)$','django.views.static.serve',{'document_root':settings.STATIC_ROOT}),
-    url(r'^admin/', admin.site.urls),
-    url(r'^go/', include('coding.urls', namespace="go")),
-    url(r'^tests/', include('codetests.urls',namespace="tests")),
-    url(r'^login/', codejamloginviews.login),
-    url(r'^dashboard/',include('dashboard.urls')),
-    url(r'^projects/',include('projects.urls')),
-    url(r'^$', codejamloginviews.login),
-    url(r'^addadmin/$', codejamloginviews.show_admins)
+    url(r'^batch/show/', views.batches, name="batchshow"),
+    url(r'^batch/new/', views.addBatch, name="batchadd"),
+    url(r'^batch/edit/(?P<batchid>[0-9]+)/', views.editBatch, name="batchedit"),
+    url(r'^batch/del/(?P<batchid>[0-9]+)/', views.delBatch, name="batchdel"),
+    url(r'^add/(?P<batchid>[0-9]+)/', views.delBatch, name="batchdel"),
 ]

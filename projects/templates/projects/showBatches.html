@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<style>
+.initiallyHidden{display:none;}
+</style> 
+<script type="text/javascript">
+function confirmdelete() {
+  return confirm("Are you sure you want to delete this batch?");
+}
+</script>
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Projects Batches</h2>
+</div>
+<h3>Available Batches</h3>
+<div class="batch-list">
+<a class="btn btn-primary" href="{{base_url}}/projects/batch/new/">New Batch</a>
+{% if batchlist %}
+<table class="table table-striped">
+<tr class="row">
+<th>Batch Name</th>
+<th>First Readout</th>
+<th>Number of Readouts</th>
+<th>Period (weeks)</th>
+<th>Editable</th>
+<th>Dashboard Visibility</th>
+<th>Actions</th>
+</tr>
+{% for a in batchlist %}
+<tr class="row">
+<td>{{a.batchname}}</td>
+<td>{{a.start}}</td>
+<td>{{a.numreadouts}}</td>
+<td>{{a.interval}}</td>
+<td>{{a.inputopen}}</td>
+<td>{{a.showdashboard}}</td>
+<td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> <a class="btn btn-danger" href="{{base_url}}/projects/batch/del/{{a.id}}/" onClick="return confirmdelete()">Delete</a></td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<div>No Batches found</div>
+{% endif %}
+</div>
+{% endblock %}

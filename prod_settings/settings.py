@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'coding',
     'codejamlogin',
     'dashboard',
-    'codetests'
+    'codetests',
+    'projects'
 ]
 
 MIDDLEWARE_CLASSES = [
