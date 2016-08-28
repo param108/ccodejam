@@ -7,8 +7,22 @@
 .project-title{width:80%;}
 </style> 
 <script type="text/javascript">
+var saving=false;
+var save_status = "Saved";
 function confirmdelete() {
-  return confirm("Are you sure you want to delete this batch?");
+  if (saving) {
+    alert("Cant delete while saving");
+    return false;
+  }
+  return confirm("Are you sure you want to delete this project?");
+}
+function checkSaved() {
+  if (save_status == "Saved") {
+    return true;
+  } else {
+    alert("There are unsaved changes");
+    return false;
+  }
 }
 
 function renumber() {
@@ -17,20 +31,89 @@ function renumber() {
   });
 }
 function onDel(target) {
-  $('#'+target).remove();
-  renumber();
+  if (saving) {
+    alert("Cant delete while saving");
+    return false;
+  }
+  if (confirm("Are you sure you want to delete this project?")) {
+    $('#'+target).remove();
+    renumber();
+  }
   return false;
 }
- 
+
+function onSave() {
+  var obj = {};
+
+  if (saving) {
+    alert("A save is already in progress. Please wait");
+    return false;
+  }
+  obj.projects=[];
+  var valid = true;
+  $(".projectdata").each(function(i,itm) {
+    var subobj={};
+    val = $(itm).attr("key");
+    subobj.id = val; 
+    subobj.seq = $(itm).children("td:first-child").text();
+    subobj.val = $(itm).find("input").first().val();
+    if (subobj.val.length == 0) {
+      alert("Project names cannot be empty");
+      valid = false;
+      return false;
+    }
+    obj.projects.push(subobj);
+  });   
+  if (! valid) {
+    return false;
+  }
+  saving = true;
+  $.ajax({ method:"POST",
+           url:"{{base_url}}/projects/update/{{batch.id}}/",
+           data: obj,
+           success: function(data) {
+             if (data.status == 0)  {
+               save_status = "Saved";
+               window.location = "{{base_url}}/projects/add/{{batch.id}}/";
+             } else {
+               save_status = "Unsaved";
+             }
+           },
+           error: function(data) {
+             save_status = "Unsaved";
+           },
+           done: function() {
+             saving = false;
+             console.log(save_status);
+           }
+  });
+  return false;
+} 
+
+function onchange() {
+  save_status="Unsaved";
+  console.log(save_status);
+}
+
 var idxcount = {{projects|length}}+1;
 function onAddProject() {
+  if (saving) {
+    alert("A save is in progress. Please wait");
+    return false;
+  }
   // this assumes there is only one table on this page
   t = $("table");
   var rowCount = $('table tr').length;
-  t.append('<tr id="proj_'+idxcount+'" class="row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add Description"/></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
+  t.append('<tr key="-1" id="proj_'+idxcount+'" class="projectdata row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add Description"/></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
+  $("#proj_"+idxcount).keypress(onchange);
   idxcount++;
+  save_status = "Unsaved";
   return false;
 }
+
+$.ready(function() {
+$(".projectdata input").keypress(onchange);
+});
 </script>
 {% endblock %}
 {% block content %}
@@ -44,13 +127,13 @@ function onAddProject() {
 <th>S.No</th>
 <th>Project Description</th>
 <th>Actions</th>
-<th><a class="btn btn-success" onClick="return onAddProject();">Add Project</a></th>
+<th><a class="btn btn-success" onClick="return onSave();">Save</a> <a class="btn btn-info" onClick="return onAddProject();">Add Project</a></th>
 </tr>
 {% for a in projects %}
-<tr class="row">
+<tr key="{{a.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
 <td>{{a.title}}</td>
-<td><a class="btn btn-danger" href="{{base_url}}/projects/del/{{a.id}}/">Delete</a></td>
+<td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{a.id}}/">Delete</a></td>
 </tr>
 {% endfor %}
 </table>
