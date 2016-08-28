@@ -76,3 +76,16 @@ def delBatch(request, batchid):
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
   batch.delete() 
   return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+def addProjects(request, batchid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+  if request.method == "GET":
+    return render(request, "projects/addProjects.html",
+               { "base_url": settings.BASE_URL,
+                 "batch": batch })
+  else:
+    pass

@@ -21,5 +21,5 @@ urlpatterns = [
     url(r'^batch/new/', views.addBatch, name="batchadd"),
     url(r'^batch/edit/(?P<batchid>[0-9]+)/', views.editBatch, name="batchedit"),
     url(r'^batch/del/(?P<batchid>[0-9]+)/', views.delBatch, name="batchdel"),
-    url(r'^add/(?P<batchid>[0-9]+)/', views.delBatch, name="batchdel"),
+    url(r'^add/(?P<batchid>[0-9]+)/', views.addProjects, name="projectadd"),
 ]

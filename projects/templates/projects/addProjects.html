@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<style>
+.initiallyHidden{display:none;}
+.project-title{width:80%;}
+</style> 
+<script type="text/javascript">
+function confirmdelete() {
+  return confirm("Are you sure you want to delete this batch?");
+}
+
+function renumber() {
+  $('table tr').each(function(i,itm) {
+    $(itm).children("td:first-child").text((i).toString());
+  });
+}
+function onDel(target) {
+  $('#'+target).remove();
+  renumber();
+  return false;
+}
+ 
+var idxcount = {{projects|length}}+1;
+function onAddProject() {
+  // this assumes there is only one table on this page
+  t = $("table");
+  var rowCount = $('table tr').length;
+  t.append('<tr id="proj_'+idxcount+'" class="row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add Description"/></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
+  idxcount++;
+  return false;
+}
+</script>
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Projects Batches</h2>
+</div>
+<h3>Batch: {{batch.batchname}}</h3>
+<div class="batch-list">
+<table class="table table-striped">
+<tr class="row">
+<th>S.No</th>
+<th>Project Description</th>
+<th>Actions</th>
+<th><a class="btn btn-success" onClick="return onAddProject();">Add Project</a></th>
+</tr>
+{% for a in projects %}
+<tr class="row">
+<td>{{forloop.counter}}</td>
+<td>{{a.title}}</td>
+<td><a class="btn btn-danger" href="{{base_url}}/projects/del/{{a.id}}/">Delete</a></td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}
