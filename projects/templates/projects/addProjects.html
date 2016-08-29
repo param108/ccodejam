@@ -70,7 +70,7 @@ function onSave() {
   saving = true;
   $.ajax({ method:"POST",
            url:"{{base_url}}/projects/update/{{batch.id}}/",
-           data: obj,
+           data: JSON.stringify(obj),
            success: function(data) {
              if (data.status == 0)  {
                save_status = "Saved";

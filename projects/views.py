@@ -4,6 +4,7 @@ from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import json
 # Create your views here.
 
 def batches(request):
@@ -100,5 +101,10 @@ def updateProjects(request, batchid):
   except:
     # try to screw with me I silently return ok without doing shit.
     return JsonResponse({"status": 0});
+  if request.method == "POST":
+    print request.body
+    projects = json.loads(request.body)
+    print projects
+  return JsonResponse({"status": 0});
 
    
