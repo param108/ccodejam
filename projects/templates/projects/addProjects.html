@@ -133,7 +133,7 @@ $(".projectdata input").keypress(onchange);
 <tr key="{{a.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
 <td><input class="project-title" type="text" value="{{a.title}}" placeholder="Add Description"/></td>
-<td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{a.id}}/">Delete</a></td>
+<td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{batch.id}}/{{a.id}}/">Delete</a></td>
 </tr>
 {% endfor %}
 </table>

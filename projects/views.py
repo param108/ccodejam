@@ -124,4 +124,19 @@ def updateProjects(request, batchid):
           print ("Failed to update project"+str(e))
   return JsonResponse({"status": 0});
 
-   
+def delProjects(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+  project.delete()
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+
