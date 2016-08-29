@@ -82,7 +82,7 @@ function onSave() {
            error: function(data) {
              save_status = "Unsaved";
            },
-           done: function() {
+           complete: function() {
              saving = false;
              console.log(save_status);
            }
@@ -132,7 +132,7 @@ $(".projectdata input").keypress(onchange);
 {% for a in projects %}
 <tr key="{{a.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
-<td>{{a.title}}</td>
+<td><input class="project-title" type="text" value="{{a.title}}" placeholder="Add Description"/></td>
 <td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{a.id}}/">Delete</a></td>
 </tr>
 {% endfor %}

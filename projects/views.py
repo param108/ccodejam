@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from models import Batch
+from models import Batch,Project
 from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
@@ -88,7 +88,8 @@ def addProjects(request, batchid):
   if request.method == "GET":
     return render(request, "projects/addProjects.html",
                { "base_url": settings.BASE_URL,
-                 "batch": batch })
+                 "batch": batch,
+                 "projects": Project.objects.filter(batch=batch) })
   else:
     pass
 
@@ -102,9 +103,25 @@ def updateProjects(request, batchid):
     # try to screw with me I silently return ok without doing shit.
     return JsonResponse({"status": 0});
   if request.method == "POST":
-    print request.body
     projects = json.loads(request.body)
-    print projects
+    for pr in projects['projects']:
+      if pr["id"] != "-1":
+        id = int(pr["id"])
+        try:
+          proj = Project.objects.get(pk=id) 
+          if proj.batch.id == batch.id:
+            proj.title = pr["val"]
+            proj.save()
+        except Exception,e:
+          print ("Failed to save new project"+str(e))
+      else:
+        proj = Project()
+        proj.batch = batch
+        proj.title = pr["val"]
+        try:
+          proj.save()
+        except Exception,e:
+          print ("Failed to update project"+str(e))
   return JsonResponse({"status": 0});
 
    
