@@ -22,6 +22,7 @@ class Member(models.Model):
   loggedin = models.BooleanField(default=False)
   username = models.CharField(max_length=30)
   user = models.ForeignKey(User, null=True) 
+  role = models.CharField(max_length=50)
   project = models.ForeignKey(Project)
 
 class Milestone(models.Model):

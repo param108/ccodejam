@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from models import Batch,Project
+from models import Batch,Project,Member
 from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 import json
 # Create your views here.
 
@@ -140,3 +141,102 @@ def delProjects(request, batchid, projectid):
   project.delete()
   return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
 
+def addMentors(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+
+  mentors = Member.objects.filter(project=project)
+  return render(request, "projects/addMentors.html", {"base_url": settings.BASE_URL,
+                                                      "batch": batch,
+                                                      "project": project,
+                                                      "mentors": mentors })
+  #return HttpResponseRedirect(settings.BASE_URL+"/projects/mentors/add/"+batchid+"/"+projectid+"/")
+
+def checkLoggedIn(memb):
+  try:
+    u = User.objects.get(username=memb.username)  
+    memb.user = u
+    memb.loggedin = True
+  except:
+    memb.loggedin = False
+ 
+@csrf_exempt
+def updateMentors(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return JsonResponse({"status": 0});
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return JsonResponse({"status": 0});
+
+  if project.batch != batch:
+    return JsonResponse({"status": 0});
+    
+  if request.method == "POST":
+    mentors = json.loads(request.body)
+    for pr in mentors['mentors']:
+      if pr["id"] != "-1":
+        id = int(pr["id"])
+        try:
+          memb = Member.objects.get(pk=id) 
+          if memb.project.id == project.id:
+            memb.username = pr["username"]
+            memb.role = pr["role"]
+            checkLoggedIn(memb)
+            memb.save()
+        except Exception,e:
+          print ("Failed to save new project"+str(e))
+      else:
+        memb = Member()
+        memb.project = project
+        memb.username = pr["username"]
+        memb.role = pr["role"]
+        checkLoggedIn(memb)
+        memb.save()
+        try:
+          memb.save()
+        except Exception,e:
+          print ("Failed to update project"+str(e))
+  return JsonResponse({"status": 0});
+
+def delMentors(request, batchid, projectid, memberid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+
+  member = None
+  try:
+    member = Member.objects.get(pk = int(memberid))
+  except:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/mentors/add/"+batchid+"/"+projectid+"/")
+
+  if member.project.id != project.id or project.batch.id != batch.id:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/mentors/add/"+batchid+"/"+projectid+"/")
+
+  member.delete()
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/mentors/add/"+batchid+"/"+projectid+"/")

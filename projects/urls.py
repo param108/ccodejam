@@ -24,4 +24,7 @@ urlpatterns = [
     url(r'^add/(?P<batchid>[0-9]+)/', views.addProjects, name="projectadd"),
     url(r'^del/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.delProjects, name="projectdel"),
     url(r'^update/(?P<batchid>[0-9]+)/', views.updateProjects, name="projectupd"),
+    url(r'^mentors/add/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.addMentors, name="mentorsadd"),
+    url(r'^mentors/update/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.updateMentors, name="mentorsupdate"),
+    url(r'^mentors/del/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/(?P<memberid>[0-9]+)/', views.delMentors, name="mentorsdel"),
 ]

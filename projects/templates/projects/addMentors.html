@@ -14,7 +14,7 @@ function confirmdelete() {
     alert("Cant delete while saving");
     return false;
   }
-  return confirm("Are you sure you want to delete this project?");
+  return confirm("Are you sure you want to delete this member?");
 }
 function checkSaved() {
   if (save_status == "Saved") {
@@ -35,7 +35,7 @@ function onDel(target) {
     alert("Cant delete while saving");
     return false;
   }
-  if (confirm("Are you sure you want to delete this project?")) {
+  if (confirm("Are you sure you want to delete this member?")) {
     $('#'+target).remove();
     renumber();
   }
@@ -49,32 +49,33 @@ function onSave() {
     alert("A save is already in progress. Please wait");
     return false;
   }
-  obj.projects=[];
+  obj.mentors=[];
   var valid = true;
   $(".projectdata").each(function(i,itm) {
     var subobj={};
     val = $(itm).attr("key");
     subobj.id = val; 
     subobj.seq = $(itm).children("td:first-child").text();
-    subobj.val = $(itm).find("input").first().val();
-    if (subobj.val.length == 0) {
+    subobj.username = $(itm).find("input").first().val();
+    subobj.role= $(itm).find("select").first().val();
+    if (subobj.username.length == 0) {
       alert("Project names cannot be empty");
       valid = false;
       return false;
     }
-    obj.projects.push(subobj);
+    obj.mentors.push(subobj);
   });   
   if (! valid) {
     return false;
   }
   saving = true;
   $.ajax({ method:"POST",
-           url:"{{base_url}}/projects/update/{{batch.id}}/",
+           url:"{{base_url}}/projects/mentors/update/{{batch.id}}/{{project.id}}/",
            data: JSON.stringify(obj),
            success: function(data) {
              if (data.status == 0)  {
                save_status = "Saved";
-               window.location = "{{base_url}}/projects/add/{{batch.id}}/";
+               window.location = "{{base_url}}/projects/mentors/add/{{batch.id}}/{{project.id}}/";
              } else {
                save_status = "Unsaved";
              }
@@ -95,8 +96,8 @@ function onchange() {
   console.log(save_status);
 }
 
-var idxcount = {{projects|length}}+1;
-function onAddProject() {
+var idxcount = {{mentors|length}}+1;
+function onAdd() {
   if (saving) {
     alert("A save is in progress. Please wait");
     return false;
@@ -104,7 +105,13 @@ function onAddProject() {
   // this assumes there is only one table on this page
   t = $("table");
   var rowCount = $('table tr').length;
-  t.append('<tr key="-1" id="proj_'+idxcount+'" class="projectdata row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add Description"/></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
+  t.append('<tr key="-1" id="proj_'+idxcount+'" class="projectdata row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add username"/></td> <td>\
+<select>\
+ <option {%if a.role == "Director"%} selected{%endif%}  value="Director">Director</option>\
+ <option {%if a.role == "Mentor"%} selected{%endif%} value="Mentor">Mentor</option>\
+ <option {%if a.role == "NCH"%} selected{%endif%} value="NCH">NCH</option>\
+</select>\
+</td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
   $("#proj_"+idxcount).keypress(onchange);
   idxcount++;
   save_status = "Unsaved";
@@ -118,22 +125,30 @@ $(".projectdata input").keypress(onchange);
 {% endblock %}
 {% block content %}
 <div>
-<h2 class="form-signin-heading header">CodeJam Projects</h2>
+<h2 class="form-signin-heading header">CodeJam Projects Mentors</h2>
 </div>
 <h3>Batch: {{batch.batchname}}</h3>
+<h3>Project: {{project.title}}</h3>
 <div class="batch-list">
 <table class="table table-striped">
 <tr class="row">
 <th>S.No</th>
-<th>Project Description</th>
+<th>Username</th>
+<th>Role</th>
 <th>Actions</th>
-<th><a class="btn btn-success" onClick="return onSave();">Save</a> <a class="btn btn-info" onClick="return onAddProject();">Add Project</a></th>
+<th><a class="btn btn-success" onClick="return onSave();">Save</a> <a class="btn btn-info" onClick="return onAdd();">Add Member</a></th>
 </tr>
-{% for a in projects %}
+{% for a in mentors %}
 <tr key="{{a.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
-<td><input class="project-title" type="text" value="{{a.title}}" placeholder="Add Description"/></td>
-<td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/mentors/add/{{batch.id}}/{{a.id}}/">Choose Mentors</a> <a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{batch.id}}/{{a.id}}/">Delete</a></td>
+<td><input class="project-title" type="text" value="{{a.username}}" placeholder="Add Username"/></td>
+<td>
+<select>
+ <option {%if a.role == "Director"%} selected{%endif%}  value="Director">Director</option>
+ <option {%if a.role == "Mentor"%} selected{%endif%} value="Mentor">Mentor</option>
+ <option {%if a.role == "NCH"%} selected{%endif%} value="NCH">NCH</option>
+</select>
+</td><td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/mentors/del/{{batch.id}}/{{project.id}}/{{a.id}}/">Delete</a></td>
 </tr>
 {% endfor %}
 </table>
