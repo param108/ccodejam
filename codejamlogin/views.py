@@ -6,7 +6,16 @@ from models import admin_users
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from forms import admin_user_form
+from projects.models import Member
 # Create your views here.
+
+def checkLoggedIn(user):
+  membs = Member.objects.filter(username=user.username).filter(loggedin=False)
+  for memb in membs:
+    memb.user = user
+    memb.loggedin = True
+    memb.save()
+ 
 def login(request):
   base_url = settings.BASE_URL
   if request.method == 'POST':
@@ -21,6 +30,7 @@ def login(request):
     user = authenticate(username=uname, password=passwd)
     if user is not None:
       if user.is_active:
+        checkLoggedIn(user)
         try:
           a_user = admin_users.objects.get(username__exact=user.username)
           if a_user.is_staff:

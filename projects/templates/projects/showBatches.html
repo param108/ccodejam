@@ -17,7 +17,9 @@ function confirmdelete() {
 </div>
 <h3>Available Batches</h3>
 <div class="batch-list">
+{% if superuser %}
 <a class="btn btn-primary" href="{{base_url}}/projects/batch/new/">New Batch</a>
+{% endif %}
 {% if batchlist %}
 <table class="table table-striped">
 <tr class="row">
@@ -37,7 +39,11 @@ function confirmdelete() {
 <td>{{a.interval}}</td>
 <td>{{a.inputopen}}</td>
 <td>{{a.showdashboard}}</td>
-<td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> <a class="btn btn-danger" href="{{base_url}}/projects/batch/del/{{a.id}}/" onClick="return confirmdelete()">Delete</a></td>
+{% if superuser %}
+<td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> <a class="btn btn-danger" href="{{base_url}}/projects/batch/del/{{a.id}}/" onClick="return confirmdelete()">Delete</a></td>
+{% else %}
+<td><a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a></td>
+{% endif %}
 </tr>
 {% endfor %}
 </table>

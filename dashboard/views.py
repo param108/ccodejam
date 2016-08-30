@@ -12,6 +12,9 @@ def show(request):
     btns.append({ 'name': "Add Admin", "url":settings.BASE_URL+"/addadmin/"})
     btns.append({ 'name': "Create a test", "url":settings.BASE_URL+"/tests/show/"})
     btns.append({ 'name': "Add Question", "url":settings.BASE_URL+"/tests/questions/"})
+  if request.user.is_superuser:
+    btns.append({ 'name': "Edit Batch/Projects", "url":settings.BASE_URL+"/projects/batch/show/"})
+  btns.append({ 'name': "My Batches", "url":settings.BASE_URL+"/projects/batch/my/"})
   btns.append({ 'name': "Open Tests", "url":settings.BASE_URL+"/go/tests/"})
   #btns.append({ 'name': "Help", "url":settings.BASE_URL+"/docs/show/help1"})
   return render(request, 'dashboard/dashboard.html',

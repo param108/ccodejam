@@ -6,11 +6,19 @@ from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 import json
+import datetime
 # Create your views here.
+def mybatches(request):
+  bs = Batch.objects.filter(project__member__user=request.user)
+  return render(request, "projects/showBatches.html",{ "superuser": request.user.is_superuser, 
+                                                       "batchlist": bs,
+                                                       "base_url": settings.BASE_URL })
+
 
 def batches(request):
   bs = Batch.objects.all()
-  return render(request, "projects/showBatches.html",{ "batchlist": bs,
+  return render(request, "projects/showBatches.html",{ "superuser": request.user.is_superuser, 
+                                                       "batchlist": bs,
                                                        "base_url": settings.BASE_URL })
 
 # util function
@@ -88,11 +96,29 @@ def addProjects(request, batchid):
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
   if request.method == "GET":
     return render(request, "projects/addProjects.html",
-               { "base_url": settings.BASE_URL,
+               { "superuser": request.user.is_superuser, 
+                 "base_url": settings.BASE_URL,
                  "batch": batch,
                  "projects": Project.objects.filter(batch=batch) })
   else:
     pass
+
+def myProjects(request, batchid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+  projects = Project.objects.filter(batch=batch).filter(member__user=request.user)
+  if request.method == "GET":
+    return render(request, "projects/addProjects.html",
+               { "superuser": request.user.is_superuser,
+                 "base_url": settings.BASE_URL,
+                 "batch": batch,
+                 "projects": projects })
+  else:
+    pass
+
 
 
 @csrf_exempt
@@ -240,3 +266,48 @@ def delMentors(request, batchid, projectid, memberid):
 
   member.delete()
   return HttpResponseRedirect(settings.BASE_URL+"/projects/mentors/add/"+batchid+"/"+projectid+"/")
+
+
+def firstlogin(project):
+  milestones = Milestone.filter(project=project).order_by('seq')
+  if len(milestones) == 0:
+    start = project.batch.start
+    delta = datetime.timedelta(weeks=project.batch.interval)
+    for i in range(project.batch.numreadouts):
+      milestone = Milestone()
+      milestone.project = project
+      milestone.seq = i+1
+      milestone.date = start
+      start = start + delta
+      milestone.save()
+  milestones = Milestone.filter(project=project).order_by('seq')
+  return milestones
+
+def addMilestones(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  itemlist=[]
+  milestones = firstlogin(project)
+  for milestone in milestones:
+    obj = {}
+    lineitems = LineItem.objects.filter(milestone = milestone).order_by('seq')
+    obj['milestone'] = milestone
+    obj['lineitems'] = lineitems
+    itemlist.append(obj)
+
+  # figure out the role of the member
+  memb = Member.filter(project=project).filter(user=request.user)
+  role = memb.role
+
+  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ms':itemlist, 'role': role, 'open': batch.inputopen})

@@ -17,11 +17,13 @@ from django.conf.urls import url
 from django.contrib import admin
 from projects import views
 urlpatterns = [
+    url(r'^batch/my/', views.mybatches, name="batchmy"),
     url(r'^batch/show/', views.batches, name="batchshow"),
     url(r'^batch/new/', views.addBatch, name="batchadd"),
     url(r'^batch/edit/(?P<batchid>[0-9]+)/', views.editBatch, name="batchedit"),
     url(r'^batch/del/(?P<batchid>[0-9]+)/', views.delBatch, name="batchdel"),
     url(r'^add/(?P<batchid>[0-9]+)/', views.addProjects, name="projectadd"),
+    url(r'^my/(?P<batchid>[0-9]+)/', views.myProjects, name="projectmy"),
     url(r'^del/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.delProjects, name="projectdel"),
     url(r'^update/(?P<batchid>[0-9]+)/', views.updateProjects, name="projectupd"),
     url(r'^mentors/add/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.addMentors, name="mentorsadd"),

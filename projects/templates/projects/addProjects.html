@@ -127,13 +127,22 @@ $(".projectdata input").keypress(onchange);
 <th>S.No</th>
 <th>Project Description</th>
 <th>Actions</th>
+{% if superuser %}
 <th><a class="btn btn-success" onClick="return onSave();">Save</a> <a class="btn btn-info" onClick="return onAddProject();">Add Project</a></th>
+{% else %}
+<th></th>
+{% endif %}
 </tr>
 {% for a in projects %}
 <tr key="{{a.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
+{%if superuser %}
 <td><input class="project-title" type="text" value="{{a.title}}" placeholder="Add Description"/></td>
-<td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/mentors/add/{{batch.id}}/{{a.id}}/">Choose Mentors</a> <a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{batch.id}}/{{a.id}}/">Delete</a></td>
+<td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/mentors/add/{{batch.id}}/{{a.id}}/">Choose Mentors</a> <a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/add/{{batch.id}}/{{a.id}}/">Milestones</a> <a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{batch.id}}/{{a.id}}/">Delete</a></td>
+{%else%}
+<td>{{a.title}}</td>
+<td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/add/{{batch.id}}/{{a.id}}/">Milestones</a></td>
+{%endif%}
 </tr>
 {% endfor %}
 </table>
