@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from models import Batch,Project,Member
+from models import Batch,Project,Member,Milestone,LineItem
 from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
@@ -269,7 +269,7 @@ def delMentors(request, batchid, projectid, memberid):
 
 
 def firstlogin(project):
-  milestones = Milestone.filter(project=project).order_by('seq')
+  milestones = Milestone.objects.filter(project=project).order_by('seq')
   if len(milestones) == 0:
     start = project.batch.start
     delta = datetime.timedelta(weeks=project.batch.interval)
@@ -280,7 +280,7 @@ def firstlogin(project):
       milestone.date = start
       start = start + delta
       milestone.save()
-  milestones = Milestone.filter(project=project).order_by('seq')
+  milestones = Milestone.objects.filter(project=project).order_by('seq')
   return milestones
 
 def addMilestones(request, batchid, projectid):
@@ -300,14 +300,82 @@ def addMilestones(request, batchid, projectid):
   itemlist=[]
   milestones = firstlogin(project)
   for milestone in milestones:
-    obj = {}
     lineitems = LineItem.objects.filter(milestone = milestone).order_by('seq')
-    obj['milestone'] = milestone
-    obj['lineitems'] = lineitems
-    itemlist.append(obj)
+    itemlist.append((milestone,lineitems))
 
   # figure out the role of the member
-  memb = Member.filter(project=project).filter(user=request.user)
+  memb = Member.objects.filter(project=project).filter(user=request.user)[0]
   role = memb.role
 
-  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ms':itemlist, 'role': role, 'open': batch.inputopen})
+  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'open': batch.inputopen, 'project': project,
+  'batch': batch})
+
+@csrf_exempt
+def updateMilestones(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return JsonResponse({"status": 0});
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return JsonResponse({"status": 0});
+
+  if project.batch != batch:
+    return JsonResponse({"status": 0});
+    
+  if request.method == "POST":
+    milestones = json.loads(request.body)
+    for pr in milestones['lineitems']:
+      if pr["id"] != "-1":
+        lid = int(pr["id"])
+        try:
+          line = LineItem.objects.get(pk=lid) 
+          if line.milestone.project.id == project.id:
+            line.details = pr["details"]
+            line.seq = pr["seq"]
+            line.save()
+        except Exception,e:
+          print ("Failed to save new project"+str(e))
+      else:
+        line = LineItem()
+        line.details = pr["details"]
+        line.seq = pr["seq"]
+        try:
+          line.milestone = Milestone.objects.get(pk=int(pr["mid"]))
+          line.save()
+        except Exception,e:
+          print ("Failed to update project"+str(e))
+  return JsonResponse({"status": 0});
+
+def delMilestones(request, batchid, projectid, lid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+
+  lineitem = None
+  try:
+    lineitem = LineItem.objects.get(pk = int(lid))
+  except:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/milestones/add/"+batchid+"/"+projectid+"/")
+
+  if lineitem.milestone.project.id != project.id or project.batch.id != batch.id:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/milestones/add/"+batchid+"/"+projectid+"/")
+
+  lineitem.delete()
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/milestones/add/"+batchid+"/"+projectid+"/")
+
+
