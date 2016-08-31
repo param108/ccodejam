@@ -1,13 +1,16 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from models import Batch,Project,Member,Milestone,LineItem
 from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
 import json
 import datetime
 # Create your views here.
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def mybatches(request):
   bs = Batch.objects.filter(project__member__user=request.user)
   return render(request, "projects/showBatches.html",{ "superuser": request.user.is_superuser, 
@@ -15,6 +18,8 @@ def mybatches(request):
                                                        "base_url": settings.BASE_URL })
 
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def batches(request):
   bs = Batch.objects.all()
   return render(request, "projects/showBatches.html",{ "superuser": request.user.is_superuser, 
@@ -59,10 +64,14 @@ def _addBatch(request, initform, initbatch, url):
                                                        "form": form,
                                                        "base_url": settings.BASE_URL })
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def addBatch(request):
   return _addBatch(request, None, None, settings.BASE_URL+"/projects/batch/new/")
 
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def editBatch(request, batchid):
   batch = None
   try:
@@ -79,6 +88,9 @@ def editBatch(request, batchid):
                               "showdashboard": batch.showdashboard})
   return _addBatch(request, form, batch, settings.BASE_URL+"/projects/batch/edit/"+str(batchid)+"/")
 
+@csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def delBatch(request, batchid):
   batch = None
   try:
@@ -88,6 +100,8 @@ def delBatch(request, batchid):
   batch.delete() 
   return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def addProjects(request, batchid):
   batch = None
   try:
@@ -103,6 +117,7 @@ def addProjects(request, batchid):
   else:
     pass
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def myProjects(request, batchid):
   batch = None
   try:
@@ -122,6 +137,8 @@ def myProjects(request, batchid):
 
 
 @csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def updateProjects(request, batchid):
   batch = None
   try:
@@ -151,6 +168,8 @@ def updateProjects(request, batchid):
           print ("Failed to update project"+str(e))
   return JsonResponse({"status": 0});
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def delProjects(request, batchid, projectid):
   batch = None
   try:
@@ -167,6 +186,8 @@ def delProjects(request, batchid, projectid):
   project.delete()
   return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def addMentors(request, batchid, projectid):
   batch = None
   try:
@@ -197,6 +218,8 @@ def checkLoggedIn(memb):
     memb.loggedin = False
  
 @csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def updateMentors(request, batchid, projectid):
   batch = None
   try:
@@ -241,6 +264,9 @@ def updateMentors(request, batchid, projectid):
           print ("Failed to update project"+str(e))
   return JsonResponse({"status": 0});
 
+@csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
 def delMentors(request, batchid, projectid, memberid):
   batch = None
   try:
@@ -283,6 +309,16 @@ def firstlogin(project):
   milestones = Milestone.objects.filter(project=project).order_by('seq')
   return milestones
 
+def ExecProjMember(project, user):
+  members = Member.objects.filter(project=project).filter(user=user)
+  for memb in members:
+    if memb.role == "Director" or memb.role == "Mentor":
+      return True
+  print "Not exec member:"+user.username
+  return False
+
+
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def addMilestones(request, batchid, projectid):
   batch = None
   try:
@@ -296,6 +332,9 @@ def addMilestones(request, batchid, projectid):
     project = Project.objects.get(pk = int(projectid))
   except:   
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  if not ExecProjMember(project, request.user):
+    return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
 
   itemlist=[]
   milestones = firstlogin(project)
@@ -311,6 +350,7 @@ def addMilestones(request, batchid, projectid):
   'batch': batch})
 
 @csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def updateMilestones(request, batchid, projectid):
   batch = None
   try:
@@ -324,6 +364,9 @@ def updateMilestones(request, batchid, projectid):
     project = Project.objects.get(pk = int(projectid))
   except:   
     return JsonResponse({"status": 0});
+
+  if not ExecProjMember(project, request.user):
+    return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
 
   if project.batch != batch:
     return JsonResponse({"status": 0});
@@ -352,6 +395,8 @@ def updateMilestones(request, batchid, projectid):
           print ("Failed to update project"+str(e))
   return JsonResponse({"status": 0});
 
+@csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def delMilestones(request, batchid, projectid, lid):
   batch = None
   try:
@@ -365,6 +410,9 @@ def delMilestones(request, batchid, projectid, lid):
     project = Project.objects.get(pk = int(projectid))
   except:   
     return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+
+  if not ExecProjMember(project, request.user):
+    return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
 
   lineitem = None
   try:
