@@ -5,6 +5,9 @@
 <style>
 .initiallyHidden{display:none;}
 .project-title{width:80%;}
+#saved_comment{
+color: red;
+}
 </style> 
 <script type="text/javascript">
 var saving=false;
@@ -71,6 +74,8 @@ function onSave() {
     return false;
   }
   saving = true;
+  save_status="Saving";
+  $("#saved_comment").html("<em>["+save_status+"]</em>");
   $.ajax({ method:"POST",
            url:"{{base_url}}/projects/milestones/update/{{batch.id}}/{{project.id}}/",
            data: JSON.stringify(obj),
@@ -88,6 +93,7 @@ function onSave() {
            complete: function() {
              saving = false;
              console.log(save_status);
+             $("#saved_comment").html("<em>["+save_status+"]</em>");
            }
   });
   return false;
@@ -95,6 +101,7 @@ function onSave() {
 
 function onchange() {
   save_status="Unsaved";
+  $("#saved_comment").html("<em>["+save_status+"]</em>");
   console.log(save_status);
 }
 
@@ -115,8 +122,10 @@ function onAdd(m_id) {
   return false;
 }
 
-$.ready(function() {
+$(document).ready(function() {
 $(".projectdata input").keypress(onchange);
+$("#saved_comment").html("<em>["+save_status+"]</em>");
+console.log(save_status);
 });
 </script>
 {% endblock %}
@@ -126,6 +135,7 @@ $(".projectdata input").keypress(onchange);
 </div>
 <h3>Batch: {{batch.batchname}}</h3>
 <h3>Project: {{project.title}}</h3>
+<div id="saved_comment"></div>
 <div class="batch-list">
 {% for m,l in ls %}
 <h3><b>Milestones for Readout {{forloop.counter}}</b></h3>

@@ -366,10 +366,10 @@ def updateMilestones(request, batchid, projectid):
     return JsonResponse({"status": 0});
 
   if not ExecProjMember(project, request.user):
-    return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
+    return JsonResponse({"status": -1});
 
   if project.batch != batch:
-    return JsonResponse({"status": 0});
+    return JsonResponse({"status": -1});
     
   if request.method == "POST":
     milestones = json.loads(request.body)
