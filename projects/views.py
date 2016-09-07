@@ -333,8 +333,8 @@ def addMilestones(request, batchid, projectid):
   except:   
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
-  if not ExecProjMember(project, request.user):
-    return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
+  #if not ExecProjMember(project, request.user):
+  #  return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
 
   itemlist=[]
   milestones = firstlogin(project)
@@ -343,8 +343,16 @@ def addMilestones(request, batchid, projectid):
     itemlist.append((milestone,lineitems))
 
   # figure out the role of the member
-  memb = Member.objects.filter(project=project).filter(user=request.user)[0]
-  role = memb.role
+  memblist = Member.objects.filter(project=project).filter(user=request.user)
+  role = "NCH"
+  if len(memblist) == 0:
+    if request.user.is_superuser:
+      role = "NCH"
+    else:
+      return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+  else:
+    memb = memblist[0]
+    role = memb.role
 
   return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'open': batch.inputopen, 'project': project,
   'batch': batch})
