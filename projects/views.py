@@ -134,7 +134,25 @@ def myProjects(request, batchid):
   else:
     pass
 
+def ExecProjMember(project, user):
+  members = Member.objects.filter(project=project).filter(user=user)
+  for memb in members:
+    if memb.role == "Director" or memb.role == "Mentor":
+      return True
+  print "Not exec member:"+user.username
+  return False
 
+
+def canEdit(user, batch, project):
+  if batch.inputopen:
+    if user.is_superuser:
+      return True
+    if ExecProjMember(project, user):
+      return True
+  else:
+    if user.is_superuser:
+      return True 
+  return False
 
 @csrf_exempt
 @login_required(login_url=(settings.BASE_URL+'/login/'))
@@ -309,14 +327,6 @@ def firstlogin(project):
   milestones = Milestone.objects.filter(project=project).order_by('seq')
   return milestones
 
-def ExecProjMember(project, user):
-  members = Member.objects.filter(project=project).filter(user=user)
-  for memb in members:
-    if memb.role == "Director" or memb.role == "Mentor":
-      return True
-  print "Not exec member:"+user.username
-  return False
-
 
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def addMilestones(request, batchid, projectid):
@@ -335,6 +345,9 @@ def addMilestones(request, batchid, projectid):
 
   #if not ExecProjMember(project, request.user):
   #  return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
+  role = "noedit"
+  if canEdit(request.user, batch, project):
+    role = "edit"
 
   itemlist=[]
   milestones = firstlogin(project)
@@ -342,19 +355,7 @@ def addMilestones(request, batchid, projectid):
     lineitems = LineItem.objects.filter(milestone = milestone).order_by('seq')
     itemlist.append((milestone,lineitems))
 
-  # figure out the role of the member
-  memblist = Member.objects.filter(project=project).filter(user=request.user)
-  role = "NCH"
-  if len(memblist) == 0:
-    if request.user.is_superuser:
-      role = "NCH"
-    else:
-      return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
-  else:
-    memb = memblist[0]
-    role = memb.role
-
-  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'open': batch.inputopen, 'project': project,
+  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project,
   'batch': batch})
 
 @csrf_exempt
@@ -373,7 +374,7 @@ def updateMilestones(request, batchid, projectid):
   except:   
     return JsonResponse({"status": 0});
 
-  if not ExecProjMember(project, request.user):
+  if not canEdit(request.user, batch, project):
     return JsonResponse({"status": -1});
 
   if project.batch != batch:
@@ -419,8 +420,8 @@ def delMilestones(request, batchid, projectid, lid):
   except:   
     return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
 
-  if not ExecProjMember(project, request.user):
-    return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
+  if not canEdit(request.user, batch, project):
+    return JsonResponse({"status": -1});
 
   lineitem = None
   try:

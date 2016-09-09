@@ -143,7 +143,7 @@ console.log(save_status);
 <table id="table_{{m.id}}" class="table table-striped">
 <tr class="row">
 <th>S.No</th><th>Details</th><th>Actions</th>
-{%if batch.inputopen and role != "NCH" %}
+{%if role == "edit" %}
 <th><a class="btn btn-info" onClick="return onAdd('{{m.id}}');">Add Line</a> <a class="btn btn-success" onClick="return onSave();">Save</a></th>
 {% else %}
 <th></th>
@@ -152,7 +152,7 @@ console.log(save_status);
 {% for line in l %}
 <tr mid="{{m.id}}" key="{{line.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
-{% if batch.inputopen and role != "NCH" %}
+{% if role == "edit" %}
 <td><input class="project-title" type="text" value="{{line.details}}" placeholder="Add details"/></td>
 <td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/del/{{batch.id}}/{{project.id}}/{{line.id}}/">Delete</a></td>
 {% else %}
