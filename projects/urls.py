@@ -17,6 +17,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from projects import views
 urlpatterns = [
+    url(r'^dashboard/(?P<batchid>[0-9]+)/', views.dashboard, name="batchmy"),
     url(r'^batch/my/', views.mybatches, name="batchmy"),
     url(r'^batch/show/', views.batches, name="batchshow"),
     url(r'^batch/new/', views.addBatch, name="batchadd"),

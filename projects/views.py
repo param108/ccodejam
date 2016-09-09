@@ -7,8 +7,11 @@ from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
+import django.utils.timezone as dtz
 import json
 import datetime
+import pytz
+import os
 # Create your views here.
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def mybatches(request):
@@ -435,4 +438,89 @@ def delMilestones(request, batchid, projectid, lid):
   lineitem.delete()
   return HttpResponseRedirect(settings.BASE_URL+"/projects/milestones/add/"+batchid+"/"+projectid+"/")
 
+class MilestoneData:
+  milestone=None
+  lineitems=None
+  def __init__(self, milestone, lineitems):
+    self.milestone = milestone
+    self.lineitems = lineitems
 
+class ProjectData:
+  project=None
+  members=None
+  mcount=0 #number of milestones
+  reason=""
+  status=""
+  directors=[]
+  nch=[]
+  mentors=[] 
+  def calcStatus(self):
+    numlines = 0
+    for mstone in self.milestones:
+      numlines += len(mstone.lineitems)
+    if self.mcount > numlines:
+      self.reason = "Too few milestones"
+      return "red"
+    check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
+    totalvalid=0
+    completed=0
+    for milestone in self.milestones:
+      dcomp = dtz.make_aware(datetime.datetime.combine(milestone.milestone.date, datetime.datetime.min.time()), pytz.timezone(os.environ['TZ']))
+      if dcomp < check:
+        for lineitem in milestone.lineitems:
+          totalvalid+=1
+          if lineitem.state == "DONE":
+            completed+=1
+    if totalvalid > 0:
+      if completed < (totalvalid/2):
+        if completed < (totalvalid/3):
+          self.reason = "Less than one third completed"
+          return "red"
+        self.reason = "Less than one half completed"
+        return "orange"
+    return "green"
+
+  def getRoles(self):
+    self.directors=[]
+    self.nch=[]
+    self.mentors=[] 
+    for member in self.members:
+      if member.role=="Director":
+        self.directors.append(member)
+      if member.role=="NCH":
+        self.nch.append(member)
+      if member.role=="Mentor":
+        self.mentors.append(member) 
+
+  def __init__(self, project):
+    self.project=project
+    self.members=Member.objects.filter(project=project)
+    self.getRoles()
+    self.milestones=[] 
+    nummilestones = 0
+    for milestone in Milestone.objects.filter(project=project):
+      mobj = MilestoneData(milestone, LineItem.objects.filter(milestone = milestone).order_by("seq"))
+      self.milestones.append(mobj)
+      nummilestones+=1
+    self.mcount = nummilestones
+    self.status = self.calcStatus()
+
+# no login required to view
+def dashboard(request, batchid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+  
+  #if not batch.showdashboard:
+  #  return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  projects = Project.objects.filter(batch_id=int(batchid)).order_by("title")
+  projectdatas=[]
+  for project in projects:
+    pd = ProjectData(project) 
+    projectdatas.append(pd)
+  return render(request, "projects/dashboard.html", { 'projects': projectdatas,
+ 'base_url': settings.BASE_URL, 'batch': batch })

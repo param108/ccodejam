@@ -1,0 +1,16 @@
+.projectdata {
+  vertical-align: top;
+  width: 80%;
+  background: white;
+}
+
+.project-container {
+  width:100%;
+  display: flex;
+  text-align: top;
+}
+
+.projectstatus {
+  vertical-align: top;
+  width:10%;
+}

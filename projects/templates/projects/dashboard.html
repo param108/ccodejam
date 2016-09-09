@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "projects/css/dashboard.css" %}">
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#id_start").datetimepicker({ format:'YYYY-MM-DD' });
+});
+</script>
+<style>
+.green {
+  background: green url("{% static "projects/img/green.png" %}");
+}
+
+
+.red {
+  background: red url("{% static "projects/img/red.png" %}");
+}
+
+.orange {
+  background: orange url("{% static "projects/img/orange.png" %}");
+}
+
+
+.initiallyHidden{display:none;}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Projects Batch</h2>
+</div>
+<h3>Projects</h3>
+<div class="batch-list">
+{% for project in projects %}
+<div class="project-container">
+<div class="projectstatus {{project.status}}">
+</div>
+<div class="projectdata">
+<b>Title:</b><a href="{{base_url}}/projects/milestones/add/{{batch.id}}/{{project.project.id}}/">{{project.project.title}}</a>
+<br>
+<b>Director:</b> 
+{% for d in project.directors %}
+{{d.username}}{% if not forloop.last %},{% endif %}
+{% endfor %}
+<br>
+<b>Mentors:</b> 
+{% for d in project.mentors %}
+{{d.username}}{% if not forloop.last %},{% endif %}
+{% endfor %}
+<br>
+<b>NCHs:</b> 
+{% for d in project.nch %}
+{{d.username}}{% if not forloop.last %},{% endif %}
+{% endfor %}
+{% if project.status == "red" %}
+<br>
+<b> Why is this project red?:</b> {{project.reason}}
+{% endif %}
+</div>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

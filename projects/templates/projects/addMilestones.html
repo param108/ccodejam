@@ -115,7 +115,7 @@ function onAdd(m_id) {
   // this assumes there is only one table on this page
   t = $(key);
   var rowCount = $(key+' tr').length;
-  t.append('<tr mid="'+m_id+'"key="-1" id="proj_'+idxcount+'" class="projectdata row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add details"/></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
+  t.append('<tr mid="'+m_id+'"key="-1" id="proj_'+idxcount+'" class="projectdata row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Add details"/></td><td></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
   $("#proj_"+idxcount).keypress(onchange);
   idxcount++;
   save_status = "Unsaved";
@@ -142,7 +142,7 @@ console.log(save_status);
 <em>Approx Date: {{m.date}}</em>
 <table id="table_{{m.id}}" class="table table-striped">
 <tr class="row">
-<th>S.No</th><th>Details</th><th>Actions</th>
+<th>S.No</th><th>Details</th><th>Status</th><th>Actions</th>
 {%if role == "edit" %}
 <th><a class="btn btn-info" onClick="return onAdd('{{m.id}}');">Add Line</a> <a class="btn btn-success" onClick="return onSave();">Save</a></th>
 {% else %}
@@ -153,10 +153,10 @@ console.log(save_status);
 <tr mid="{{m.id}}" key="{{line.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
 {% if role == "edit" %}
-<td><input class="project-title" type="text" value="{{line.details}}" placeholder="Add details"/></td>
+<td><input class="project-title" type="text" value="{{line.details}}" placeholder="Add details"/></td><td></td>
 <td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/del/{{batch.id}}/{{project.id}}/{{line.id}}/">Delete</a></td>
 {% else %}
-<td>{{line.details}}</td><td></td>
+<td>{{line.details}}</td><td>{{line.state}}</td><td></td>
 {% endif %}
 </tr>
 {% endfor %}
