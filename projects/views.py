@@ -514,8 +514,8 @@ def dashboard(request, batchid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
   
-  #if not batch.showdashboard:
-  #  return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+  if not batch.showdashboard:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
   projects = Project.objects.filter(batch_id=int(batchid)).order_by("title")
   projectdatas=[]
