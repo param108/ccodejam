@@ -8,6 +8,9 @@
   width:100%;
   display: flex;
   text-align: top;
+  border-width: 1px;
+  border-style: solid;
+  border-color: grey;
 }
 
 .projectstatus {
