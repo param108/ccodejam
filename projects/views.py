@@ -145,6 +145,17 @@ def ExecProjMember(project, user):
   print "Not exec member:"+user.username
   return False
 
+def canEditStatus(user, batch, project):
+  if batch.showdashboard:
+    if user.is_superuser:
+      return True
+    if ExecProjMember(project, user):
+      return True
+  else:
+    if user.is_superuser:
+      return True 
+  return False
+
 
 def canEdit(user, batch, project):
   if batch.inputopen:
@@ -330,6 +341,35 @@ def firstlogin(project):
   milestones = Milestone.objects.filter(project=project).order_by('seq')
   return milestones
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+def ShowMilestoneStates(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  #if not ExecProjMember(project, request.user):
+  #  return HttpResponseRedirect(settings.BASE_URL+"/dashboard/show/")
+  role = "noedit"
+  if canEditStatus(request.user, batch, project):
+    role = "status"
+
+  itemlist=[]
+  milestones = firstlogin(project)
+  for milestone in milestones:
+    lineitems = LineItem.objects.filter(milestone = milestone).order_by('seq')
+    itemlist.append((milestone,lineitems))
+
+  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project,
+  'batch': batch})
 
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def addMilestones(request, batchid, projectid):
@@ -360,6 +400,45 @@ def addMilestones(request, batchid, projectid):
 
   return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project,
   'batch': batch})
+@csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+def statusMilestones(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return JsonResponse({"status": 0});
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return JsonResponse({"status": 0});
+
+  if not canEditStatus(request.user, batch, project):
+    return JsonResponse({"status": -1});
+
+  if project.batch != batch:
+    return JsonResponse({"status": -1});
+    
+  if request.method == "POST":
+    milestones = json.loads(request.body)
+    for pr in milestones['lineitems']:
+      if pr["id"] != "-1":
+        lid = int(pr["id"])
+        try:
+          line = LineItem.objects.get(pk=lid) 
+          if line.milestone.project.id == project.id:
+            line.state = pr["state"]
+            line.save()
+        except Exception,e:
+          print ("Failed to save new project"+str(e))
+      else:
+        # this view is not the correct place for new lineItems
+        return JsonResponse({"status": -1});
+  return JsonResponse({"status": 0});
+
 
 @csrf_exempt
 @login_required(login_url=(settings.BASE_URL+'/login/'))

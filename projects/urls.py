@@ -32,5 +32,7 @@ urlpatterns = [
     url(r'^mentors/del/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/(?P<memberid>[0-9]+)/', views.delMentors, name="mentorsdel"),
     url(r'^milestones/add/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.addMilestones, name="milestonesadd"),
     url(r'^milestones/update/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.updateMilestones, name="milestonesupdate"),
+    url(r'^milestones/status/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.statusMilestones, name="milestonesstatus"),
+    url(r'^milestones/show/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.ShowMilestoneStates, name="milestonesstatusupd"),
     url(r'^milestones/del/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/(?P<lid>[0-9])/', views.delMilestones, name="milestonesdel"),
 ]

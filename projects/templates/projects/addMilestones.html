@@ -62,12 +62,17 @@ function onSave() {
     subobj.id = val; 
     subobj.mid = mid; 
     subobj.seq = $(itm).children("td:first-child").text();
+    {% if role == "edit" %} 
     subobj.details = $(itm).find("input").first().val();
     if (subobj.details.length == 0) {
       alert("lineitems cannot be empty");
       valid = false;
       return false;
     }
+    {% endif %}
+    {% if role == "status" %} 
+    subobj.state = $(itm).find("select").val();
+    {% endif %}
     obj.lineitems.push(subobj);
   });   
   if (! valid) {
@@ -77,12 +82,20 @@ function onSave() {
   save_status="Saving";
   $("#saved_comment").html("<em>["+save_status+"]</em>");
   $.ajax({ method:"POST",
+           {% if role == "edit" %}
            url:"{{base_url}}/projects/milestones/update/{{batch.id}}/{{project.id}}/",
+           {% elif role == "status" %}
+           url:"{{base_url}}/projects/milestones/status/{{batch.id}}/{{project.id}}/",
+           {% endif %}
            data: JSON.stringify(obj),
            success: function(data) {
              if (data.status == 0)  {
                save_status = "Saved";
+               {% if role == "edit" %} 
                window.location = "{{base_url}}/projects/milestones/add/{{batch.id}}/{{project.id}}/";
+               {% elif role == "status" %}
+               window.location = "{{base_url}}/projects/milestones/show/{{batch.id}}/{{project.id}}/";
+               {% endif %}
              } else {
                save_status = "Unsaved";
              }
@@ -125,6 +138,7 @@ function onAdd(m_id) {
 $(document).ready(function() {
 $(".projectdata input").keypress(onchange);
 $("#saved_comment").html("<em>["+save_status+"]</em>");
+$(".statusdropdown").change(onchange);
 console.log(save_status);
 });
 </script>
@@ -145,6 +159,8 @@ console.log(save_status);
 <th>S.No</th><th>Details</th><th>Status</th><th>Actions</th>
 {%if role == "edit" %}
 <th><a class="btn btn-info" onClick="return onAdd('{{m.id}}');">Add Line</a> <a class="btn btn-success" onClick="return onSave();">Save</a></th>
+{%elif role == "status" %}
+<th><a class="btn btn-success" onClick="return onSave();">Save</a></th>
 {% else %}
 <th></th>
 {% endif %}
@@ -155,8 +171,15 @@ console.log(save_status);
 {% if role == "edit" %}
 <td><input class="project-title" type="text" value="{{line.details}}" placeholder="Add details"/></td><td></td>
 <td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/del/{{batch.id}}/{{project.id}}/{{line.id}}/">Delete</a></td>
-{% else %}
+{% elif role == "noedit"  %}
 <td>{{line.details}}</td><td>{{line.state}}</td><td></td>
+{% elif role == "status" %}
+<td>{{line.details}}</td><td>{{line.state}}</td><td>
+<select class="statusdropdown">\
+ <option {%if line.state == "NOTSTARTED"%} selected{%endif%}  value="NOTSTARTED">Not Started</option>\
+ <option {%if line.state == "WIP"%} selected{%endif%} value="WIP">Work In Progress</option>\
+ <option {%if line.state == "DONE"%} selected{%endif%} value="DONE">Done</option>\
+</select></td>
 {% endif %}
 </tr>
 {% endfor %}

@@ -141,7 +141,7 @@ $(".projectdata input").keypress(onchange);
 <td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/mentors/add/{{batch.id}}/{{a.id}}/">Choose Mentors</a> <a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/add/{{batch.id}}/{{a.id}}/">Milestones</a> <a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/del/{{batch.id}}/{{a.id}}/">Delete</a></td>
 {%else%}
 <td>{{a.title}}</td>
-<td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/add/{{batch.id}}/{{a.id}}/">Milestones</a></td>
+<td><a class="btn btn-info" onClick="return checkSaved();" href="{{base_url}}/projects/milestones/add/{{batch.id}}/{{a.id}}/">Milestones</a> <a class="btn btn-info" href="{{base_url}}/projects/milestones/show/{{batch.id}}/{{a.id}}/">Status</a></td>
 {%endif%}
 </tr>
 {% endfor %}
