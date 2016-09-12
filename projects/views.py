@@ -112,11 +112,19 @@ def addProjects(request, batchid):
   except:
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
   if request.method == "GET":
+    projects = Project.objects.filter(batch=batch)
+    projectlist=[]
+    for project in projects:
+      role="noedit"
+      if canEditStatus(request.user, batch, project):
+        role = "edit"
+      projectlist.append((project,role))
+ 
     return render(request, "projects/addProjects.html",
                { "superuser": request.user.is_superuser, 
                  "base_url": settings.BASE_URL,
                  "batch": batch,
-                 "projects": Project.objects.filter(batch=batch) })
+                 "projects": projectlist })
   else:
     pass
 
@@ -128,12 +136,21 @@ def myProjects(request, batchid):
   except:
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
   projects = Project.objects.filter(batch=batch).filter(member__user=request.user)
+
+  projectlist=[]
+  for project in projects:
+    role="noedit"
+    if canEditStatus(request.user, batch, project):
+      role = "edit"
+    projectlist.append((project,role))
+  
+
   if request.method == "GET":
     return render(request, "projects/addProjects.html",
                { "superuser": request.user.is_superuser,
                  "base_url": settings.BASE_URL,
                  "batch": batch,
-                 "projects": projects })
+                 "projects": projectlist })
   else:
     pass
 
