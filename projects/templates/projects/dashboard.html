@@ -57,6 +57,9 @@ $(document).ready(function() {
 {% if project.status == "red" %}
 <br>
 <b> Why is this project red?:</b> {{project.reason}}
+{% elif project.status == "orange" %}
+<br>
+<b> Why is this project Orange?:</b> {{project.reason}}
 {% endif %}
 </div>
 </div>

@@ -568,12 +568,14 @@ class ProjectData:
           if lineitem.state == "DONE":
             completed+=1
     if totalvalid > 0:
-      if completed < (totalvalid/2):
-        if completed < (totalvalid/3):
-          self.reason = "Less than one third completed"
+      # '=' is a hack to make 0 done a red
+      if completed <= (totalvalid/2):
+          self.reason = "Less than half completed"
           return "red"
-        self.reason = "Less than one half completed"
-        return "orange"
+      else:
+        if completed < totalvalid:
+          self.reason = "running behind schedule"
+          return "orange"
     return "green"
 
   def getRoles(self):
