@@ -1,17 +1,20 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from models import Batch,Project,Member,Milestone,LineItem
+from models import Batch,Project,Member,Milestone,LineItem,ScoreCard
+from models import ScoreQn,SocreAns,ScoreCardLink
 from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
+from coding.view import Lock
 import django.utils.timezone as dtz
 import json
 import datetime
 import pytz
 import os
+
 # Create your views here.
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def mybatches(request):
@@ -622,3 +625,65 @@ def dashboard(request, batchid):
     projectdatas.append(pd)
   return render(request, "projects/dashboard.html", { 'projects': projectdatas,
  'base_url': settings.BASE_URL, 'batch': batch })
+
+def createScore(request,batchid):
+  pass
+
+def editScore(request,scardid):
+  pass
+
+def deleteScore(request,scardid):
+  pass
+
+def addScoreQn(request):
+  pass
+
+def delScoreQn(request, scqnid):
+  pass
+
+def editScoreQn(request, scqnid):
+  pass
+
+def createScoreCard(scorecardid, user):
+  try:
+    scorecard = ScoreCard.objects.get(pk=scorecardid)
+  except:
+    return False
+  with(user, "createscorecard") as lock: 
+    ScoreAns.objects.filter(user = user).filter(link_scorecard = scorecard)
+    if len(ScoreAns):
+      return True
+
+    for link in  ScoreCardLink.object.filter(scorecard = scorecard).order_by("seq"):
+      # if a link exists break
+      ans = ScoreAns(user = user, link=link)
+      ans.save()
+    return True
+  return False
+    
+def generateyesno(ans):
+  i = '<div id="ans_%d" class="scorecard-input"><label>%s <input type="checkbox"/></label></div>'%(ans.id, ans.link.qn.qn)
+  print i
+  return i
+
+def generaterange(ans):
+  i = '<div id="ans_%d"><label>%s</label><br>'%(ans.id, ans.link.qn.qn)
+  radios= [ '<input type="radio" name="ans_%d" value="%d">%d'%(ans.id,x) for x in range(1,6)]
+  i+=" ".join(radios)
+  print i
+  return i+'</div>'
+
+def generaterangecomment(ans):
+  i = '<div id="ans_%d"><label>%s</label><br>'%(ans.id, ans.link.qn.qn)
+  radios= [ '<input type="radio" name="ans_%d" value="%d">%d'%(ans.id,x) for x in range(1,6)]
+  i+=" ".join(radios)
+  i+='<textarea class="scorecard-textarea"></textarea>'
+  print i
+  return i+'</div>'
+
+def generate_form(batchid):
+  sc = ScoreCard.get(batch_id = batchid)
+  
+
+
+

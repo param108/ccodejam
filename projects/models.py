@@ -40,3 +40,21 @@ class LineItem(models.Model):
 class FinalOutcome(models.Model):
   details = models.CharField(max_length=500)
   project=models.OneToOneField(Project)
+
+class ScoreCard(models.Model):
+  batch = models.ForeignKey(Batch)
+
+class ScoreQn(models.Model):
+  qn = models.CharField(max_length=200, unique=True)
+  type = models.CharField(max_length=20)
+
+class ScoreCardLink(models.Model):
+  scorecard = models.ForeignKey(ScoreCard)
+  qn = models.ForeignKey(ScoreQn)
+  seq = models.IntegerField()
+
+class ScoreAns(models.Model):
+  user = models.ForeignKey(User)
+  link = models.ForeignKey(ScoreCardLink)
+  ansint = models.IntegerField(null=True)
+  anschar = models.CharField(max_length=200, null=True)

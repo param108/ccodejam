@@ -35,4 +35,10 @@ urlpatterns = [
     url(r'^milestones/status/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.statusMilestones, name="milestonesstatus"),
     url(r'^milestones/show/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.ShowMilestoneStates, name="milestonesstatusupd"),
     url(r'^milestones/del/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/(?P<lid>[0-9])/', views.delMilestones, name="milestonesdel"),
+    url(r'^scorecard/create/(?P<batchid>[0-9]+)/', views.createScore, name="createScoreCard"),
+    url(r'^scorecard/edit/(?P<scardid>[0-9]+)/', views.editScore, name="editScoreCard"),
+    url(r'^scorecard/delete/(?P<scardid>[0-9]+)/', views.deleteScore, name="deleteScoreCard"),
+    url(r'^scorecard/questions/add/', views.addScoreQn, name="addScoreQn"),
+    url(r'^scorecard/questions/delete/(?P<scqnid>[0-9]+)/', views.delScoreQn, name="delScoreQn"),
+    url(r'^scorecard/questions/edit/(?P<scqnid>[0-9]+)/', views.editScoreQn, name="editScoreQn"),
 ]
