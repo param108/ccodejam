@@ -18,6 +18,8 @@ from django.contrib import admin
 from projects import views
 urlpatterns = [
     url(r'^dashboard/(?P<batchid>[0-9]+)/', views.dashboard, name="batchmy"),
+    url(r'^judge/add/(?P<batchid>[0-9]+)/', views.addJudge, name="addjudge"),
+    url(r'^judge/delete/(?P<batchid>[0-9]+)/(?P<judgeid>[0-9]+)/', views.delJudge, name="deljudge"),
     url(r'^batch/my/', views.mybatches, name="batchmy"),
     url(r'^batch/show/', views.batches, name="batchshow"),
     url(r'^batch/new/', views.addBatch, name="batchadd"),

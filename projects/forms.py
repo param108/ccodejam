@@ -24,3 +24,8 @@ class MemberForm(forms.Form):
 class LineItemForm(forms.Form):
   milestoneid= forms.IntegerField()
   details= forms.CharField(max_length=300, widget=forms.Textarea)
+
+class JudgeForm(forms.Form):
+  username=forms.CharField(max_length=30, label="Username")
+
+

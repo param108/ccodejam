@@ -42,6 +42,7 @@ function confirmdelete() {
 {% if superuser %}
 <td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> 
 <a class="btn btn-success" href="{{base_url}}/projects/scorecard/create/{{a.id}}/">Add/Edit ScoreCard</a> 
+<a class="btn btn-success" href="{{base_url}}/projects/judge/add/{{a.id}}/">Add Judges</a> 
 {% if not readoutopen %}
 <a class="btn btn-primary" href="{{base_url}}/projects/batch/startreadout/{{a.id}}/">Start Readout</a> 
 {% else %}

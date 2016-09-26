@@ -76,3 +76,7 @@ class ScoreAns(models.Model):
   link = models.ForeignKey(ScoreCardLink)
   ansint = models.IntegerField(null=True)
   anschar = models.CharField(max_length=200, null=True)
+
+class Judges(models.Model):
+  batch= models.ForeignKey(Batch)
+  username= models.CharField(max_length=100,unique=True)

@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from models import Batch,Project,Member,Milestone,LineItem,ScoreCard,ReadOut
+from models import Batch,Project,Member,Milestone,LineItem,ScoreCard,ReadOut,Judges
 from models import ScoreQn,ScoreAns,ScoreCardLink
-from forms import BatchForm
+from forms import BatchForm,JudgeForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -806,22 +806,37 @@ def updateScoreCard(request, batchid):
           print ("Failed to update project"+str(e))
   return JsonResponse({"status": 0});
 
+
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 @user_passes_test(lambda u: u.is_superuser)
-def delProjects(request, batchid, projectid):
-  batch = None
-  try:
-    batch = Batch.objects.get(pk=int(batchid))
-  except:
-    # try to screw with me I silently return ok without doing shit.
-    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+def addJudge(request, batchid):
+  batch = Batch.objects.get(pk=int(batchid))
+  if request.method=="GET":
+    judgelist = Judges.objects.filter(batch=batch)
+    form=JudgeForm()
+    return render (request, "projects/showJudges.html",{"batch": batch,
+                                               "judges": judgelist,
+                                               "base_url": settings.BASE_URL,
+                                               "form": form})
+  if request.method=="POST":
+    form = JudgeForm(request.POST)
+    if form.is_valid():
+      judge = Judges(username=form.cleaned_data["username"],batch=batch)
+      try:
+        judge.save()
+        form=JudgeForm()
+      except:
+        form.add_error("username","Please choose a unique username")
+    judgelist = Judges.objects.filter(batch=batch)
+    return render (request, "projects/showJudges.html",{ "batch": batch,
+                                               "judges": judgelist,
+                                               "base_url": settings.BASE_URL,
+                                               "form": form})
 
-  project = None
-  try:
-    project = Project.objects.get(pk = int(projectid))
-  except:   
-    return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
-  project.delete()
-  return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
-
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def delJudge(request,batchid, judgeid):
+  judge = Judges.objects.get(pk=int(judgeid))
+  judge.delete()  
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/judge/add/"+str(batchid)+"/")
 
