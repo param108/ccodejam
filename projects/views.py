@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from models import Batch,Project,Member,Milestone,LineItem,ScoreCard
-from models import ScoreQn,SocreAns,ScoreCardLink
+from models import Batch,Project,Member,Milestone,LineItem,ScoreCard,ReadOut
+from models import ScoreQn,ScoreAns,ScoreCardLink
 from forms import BatchForm
 from codejam import settings
 from django.http import HttpResponseRedirect,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
-from coding.view import Lock
+from coding.views import Lock
 import django.utils.timezone as dtz
 import json
 import datetime
@@ -19,8 +19,15 @@ import os
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def mybatches(request):
   bs = Batch.objects.filter(project__member__user=request.user)
+  batchlist=[]
+  for batch in bs:
+    routs = ReadOut.objects.filter(batch=bs).filter(isopen=True)
+    readoutopen=False
+    if len(routs):
+      readoutopen=True
+    batchlist.append((batch, readoutopen))
   return render(request, "projects/showBatches.html",{ "superuser": request.user.is_superuser, 
-                                                       "batchlist": bs,
+                                                       "batchlist": batchlist,
                                                        "base_url": settings.BASE_URL })
 
 
@@ -28,9 +35,18 @@ def mybatches(request):
 @user_passes_test(lambda u: u.is_superuser)
 def batches(request):
   bs = Batch.objects.all()
+  batchlist =[]
+  for batch in bs:
+    routs = ReadOut.objects.filter(batch=bs).filter(isopen=True)
+    readoutopen=False
+    if len(routs):
+      readoutopen=True
+    batchlist.append((batch, readoutopen))
   return render(request, "projects/showBatches.html",{ "superuser": request.user.is_superuser, 
-                                                       "batchlist": bs,
+                                                       "batchlist": batchlist,
+                                                       "readoutopen": readoutopen,
                                                        "base_url": settings.BASE_URL })
+
 
 # util function
 def _addBatch(request, initform, initbatch, url):
@@ -644,7 +660,7 @@ def delScoreQn(request, scqnid):
 def editScoreQn(request, scqnid):
   pass
 
-def createScoreCard(scorecardid, user):
+def createAnswerCard(scorecardid, user):
   try:
     scorecard = ScoreCard.objects.get(pk=scorecardid)
   except:
@@ -684,6 +700,123 @@ def generaterangecomment(ans):
 def generate_form(batchid):
   sc = ScoreCard.get(batch_id = batchid)
   
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def create_readout(request, batchid):
+  #check if one already exists that is open.
+  batch = Batch.objects.get(pk=int(batchid)) 
+  with Lock(request.user,"createreadout") as lock:
+    routs = ReadOut.objects.filter(batch_id = batchid).filter(isopen=True)
+    if len(routs):
+      return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+    rout =  ReadOut(batch=batch)
+    rout.save() 
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
+
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def stop_readout(request,batchid):
+  with Lock(request.user,"stopreadout") as lock:
+    routs = ReadOut.objects.filter(batch_id = batchid).filter(isopen=True)
+    if not len(routs):
+      return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+    routs[0].isopen=False
+    routs[0].save()
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+def judges(request, batchid):
+  pass
+
+def deljudge(request, batchid):
+  pass
+
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def createScoreCard(request, batchid):
+  mysc = None
+  batch = Batch.objects.get(pk = batchid)
+  with Lock(request.user,"stopreadout") as lock:
+    scorecard = ScoreCard.objects.filter(batch = batch)
+    if not len(scorecard):
+      mysc = ScoreCard(batch=batch)
+      mysc.save()
+    else:
+      mysc = scorecard[0]
+  scs = ScoreCardLink.objects.filter(scorecard=mysc).order_by("seq") 
+  return render(request, "projects/scorecard.html", { "batch": batch, 
+                                                      "scs": scs,
+                                                      "base_url": settings.BASE_URL}) 
+
+
+@csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def updateScoreCard(request, batchid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return JsonResponse({"status": 0});
+  scorecard=None
+
+  with Lock(request.user,"createscorecard") as lock:
+    try:
+      scorecard = ScoreCard.objects.get(batch=batch)
+    except:
+      print "failed to find scorecard"
+      return JsonResponse({"status": -1});
+
+  if request.method == "POST":
+    qns = json.loads(request.body)
+    for qn in qns['lineitems']:
+      print qn
+      if qn["id"] != "-1":
+        id = int(qn["id"])
+        try:
+          qno = ScoreQn.objects.get(pk=id) 
+          qno.qn = qn["qn"]
+          qno.subqn = qn["subqn"]
+          qno.type = qn["type"]
+          qno.save()
+        except Exception,e:
+          print ("Failed to save new qn"+str(e))
+          return JsonResponse({"status": -1});
+        sclink = ScoreCardLink.objects.filter(batch=batch).filter(qn=qno)[0]
+        try:
+          if sclink.seq != qn["seq"]:
+            sclink.seq = qn["seq"]
+            sclink.save()
+        except Exception,e:
+          print ("Failed to save sclink"+str(e))
+          return JsonResponse({"status": -1});
+      else:
+        qno = ScoreQn(qn=qn["qn"],subqn=qn["subqn"], type=qn["type"])
+        qno.save()
+        sclink = ScoreCardLink(qn=qno, seq=qn["seq"], scorecard=scorecard)
+        try:
+          sclink.save()
+        except Exception,e:
+          print ("Failed to update project"+str(e))
+  return JsonResponse({"status": 0});
+
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def delProjects(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  project = None
+  try:
+    project = Project.objects.get(pk = int(projectid))
+  except:   
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
+  project.delete()
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/add/"+batchid+"/")
 
 

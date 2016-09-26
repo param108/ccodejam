@@ -13,6 +13,12 @@ class Batch(models.Model):
   # last date to enter data
   inputopen=models.BooleanField(default=True)
   showdashboard=models.BooleanField(default=False)
+  judgingopen=models.BooleanField(default=False)
+
+class ReadOut(models.Model):
+  start=models.DateField(auto_now_add=True)
+  batch=models.ForeignKey(Batch)
+  isopen=models.BooleanField(default=True)
 
 class Project(models.Model):
   batch=models.ForeignKey(Batch)
@@ -41,15 +47,27 @@ class FinalOutcome(models.Model):
   details = models.CharField(max_length=500)
   project=models.OneToOneField(Project)
 
+# have only one scorecard per batch
 class ScoreCard(models.Model):
   batch = models.ForeignKey(Batch)
 
+# links scorecard, readout and user
+# only one per user-readout-project
+class ScoreCardUser(models.Model):
+  project=models.ForeignKey(Project,null=True)
+  readout=models.ForeignKey(ReadOut)
+  user=models.ForeignKey(User)
+  scorecard=models.ForeignKey(ScoreCard)
+
+
 class ScoreQn(models.Model):
   qn = models.CharField(max_length=200, unique=True)
+  subqn = models.CharField(max_length=200, default="")
   type = models.CharField(max_length=20)
 
 class ScoreCardLink(models.Model):
-  scorecard = models.ForeignKey(ScoreCard)
+  # added nullable for migration
+  scorecard=models.ForeignKey(ScoreCard,null=True)
   qn = models.ForeignKey(ScoreQn)
   seq = models.IntegerField()
 

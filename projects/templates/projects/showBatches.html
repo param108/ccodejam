@@ -31,7 +31,7 @@ function confirmdelete() {
 <th>Dashboard Visibility</th>
 <th>Actions</th>
 </tr>
-{% for a in batchlist %}
+{% for a,readoutopen in batchlist %}
 <tr class="row">
 <td>{{a.batchname}}</td>
 <td>{{a.start}}</td>
@@ -40,7 +40,14 @@ function confirmdelete() {
 <td>{{a.inputopen}}</td>
 <td>{{a.showdashboard}}</td>
 {% if superuser %}
-<td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> <a class="btn btn-danger" href="{{base_url}}/projects/batch/del/{{a.id}}/" onClick="return confirmdelete()">Delete</a></td>
+<td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> 
+<a class="btn btn-success" href="{{base_url}}/projects/scorecard/create/{{a.id}}/">Add/Edit ScoreCard</a> 
+{% if not readoutopen %}
+<a class="btn btn-primary" href="{{base_url}}/projects/batch/startreadout/{{a.id}}/">Start Readout</a> 
+{% else %}
+<a class="btn btn-primary" href="{{base_url}}/projects/batch/stopreadout/{{a.id}}/">Stop Readout</a> 
+{% endif %}
+<a class="btn btn-danger" href="{{base_url}}/projects/batch/del/{{a.id}}/" onClick="return confirmdelete()">Delete</a></td>
 {% else %}
 <td><a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a></td>
 {% endif %}
