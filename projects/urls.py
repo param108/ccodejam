@@ -43,6 +43,6 @@ urlpatterns = [
     url(r'^scorecard/edit/(?P<scardid>[0-9]+)/', views.editScore, name="editScoreCard"),
     url(r'^scorecard/delete/(?P<scardid>[0-9]+)/', views.deleteScore, name="deleteScoreCard"),
     url(r'^scorecard/questions/update/(?P<batchid>[0-9]+)/', views.updateScoreCard, name="addScoreQn"),
-    url(r'^scorecard/questions/delete/(?P<scqnid>[0-9]+)/', views.delScoreQn, name="delScoreQn"),
+    url(r'^scorecard/questions/delete/(?P<batchid>[0-9]+)/(?P<scqnid>[0-9]+)/', views.delScoreQn, name="delScoreQn"),
     url(r'^scorecard/questions/edit/(?P<scqnid>[0-9]+)/', views.editScoreQn, name="editScoreQn"),
 ]

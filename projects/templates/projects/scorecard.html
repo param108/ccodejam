@@ -137,7 +137,6 @@ console.log(save_status);
 <h2 class="form-signin-heading header">CodeJam Projects Milestones</h2>
 </div>
 <h3>Batch: {{batch.batchname}}</h3>
-<h3>Project: {{project.title}}</h3>
 <div id="saved_comment"></div>
 <div class="batch-list">
 <h3><b>Questions for Readout</b></h3>
@@ -155,7 +154,7 @@ console.log(save_status);
 <option {% if qn.qn.type == "range" %} selected {% endif %} value="range">Range(0-5)</option>
 <option {% if qn.qn.type == "rangecomment" %} selected {% endif %} value="rangecomment">Range With Comment</option>
 </select></td>
-<td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/scorecard/questions/delete/{{qn.qn.id}}/">Delete</a></td>
+<td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/scorecard/questions/delete/{{batch.id}}/{{qn.qn.id}}/">Delete</a></td>
 </tr>
 {% endfor %}
 </table>

@@ -654,9 +654,14 @@ def deleteScore(request,scardid):
 def addScoreQn(request):
   pass
 
-def delScoreQn(request, scqnid):
-  pass
-
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+@user_passes_test(lambda u: u.is_superuser)
+def delScoreQn(request, batchid, scqnid):
+  qno = ScoreQn.objects.get(pk=int(scqnid)) 
+  batch = Batch.objects.get(pk=int(batchid))
+  qno.delete()
+  return HttpResponseRedirect(settings.BASE_URL+"/projects/scorecard/create/"+batchid+"/")
+  
 def editScoreQn(request, scqnid):
   pass
 
@@ -783,7 +788,7 @@ def updateScoreCard(request, batchid):
         except Exception,e:
           print ("Failed to save new qn"+str(e))
           return JsonResponse({"status": -1});
-        sclink = ScoreCardLink.objects.filter(batch=batch).filter(qn=qno)[0]
+        sclink = ScoreCardLink.objects.filter(scorecard=scorecard).filter(qn=qno)[0]
         try:
           if sclink.seq != qn["seq"]:
             sclink.seq = qn["seq"]
