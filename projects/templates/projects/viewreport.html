@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+{% load coding_extras %}
+<style>
+.initiallyHidden{display:none;}
+.project-title{width:80%;}
+#saved_comment{
+color: red;
+}
+</style> 
+<script type="text/javascript">
+var saving=false;
+var save_status = "Saved";
+function confirmdelete() {
+  if (saving) {
+    alert("Cant delete while saving");
+    return false;
+  }
+  return confirm("Are you sure you want to delete this member?");
+}
+function checkSaved() {
+  if (save_status == "Saved") {
+    return true;
+  } else {
+    alert("There are unsaved changes");
+    return false;
+  }
+}
+
+function onSave() {
+  var obj = {};
+
+  if (saving) {
+    alert("A save is already in progress. Please wait");
+    return false;
+  }
+  obj.lineitems=[];
+  var valid = true;
+  $(".projectdata").each(function(i,itm) {
+    var subobj={};
+    val = $(itm).attr("key");
+    qntype = $(itm).attr("qntype");
+    // milestone
+    subobj.id = val; 
+    subobj.qntype = qntype;
+    if (qntype == "yesno") {
+      subobj.ansint = $(itm).find("select").val();
+    } else if (qntype == "range") {
+      subobj.ansint = $(itm).find("select").val();
+    } else if (qntype == "rangecomment") {
+      subobj.ansint = $(itm).find("select").val();
+      subobj.anschar = $(itm).find("textarea").val();
+    }
+    obj.lineitems.push(subobj);
+  });   
+  if (! valid) {
+    return false;
+  }
+  saving = true;
+  save_status="Saving";
+  $("#saved_comment").html("<em>["+save_status+"]</em>");
+  $.ajax({ method:"POST",
+           url:"{{base_url}}/projects/scorecard/answers/update/{{batch.id}}/{{project.id}}/",
+           data: JSON.stringify(obj),
+           success: function(data) {
+             if (data.status == 0)  {
+               save_status = "Saved";
+               window.location = "{{base_url}}/projects/scorecard/show/{{batch.id}}/{{project.id}}/";
+             } else {
+               save_status = "Unsaved";
+             }
+           },
+           error: function(data) {
+             save_status = "Unsaved";
+           },
+           complete: function() {
+             saving = false;
+             console.log(save_status);
+             $("#saved_comment").html("<em>["+save_status+"]</em>");
+           }
+  });
+  return false;
+} 
+
+function onchange() {
+  save_status="Unsaved";
+  $("#saved_comment").html("<em>["+save_status+"]</em>");
+  console.log(save_status);
+}
+
+var idxcount = 1;
+
+$(document).ready(function() {
+$(".projectdata input").keypress(onchange);
+$("#saved_comment").html("<em>["+save_status+"]</em>");
+$(".statusdropdown").change(onchange);
+console.log(save_status);
+});
+</script>
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Projects Milestones</h2>
+</div>
+<h3>Batch: {{batch.batchname}}</h3>
+<h3>Project: {{project.title}}</h3>
+<h3>Judge: {{user.username}}</h3>
+<div id="saved_comment"></div>
+<div class="batch-list">
+<h3><b>Questions for Readout</b></h3>
+<table id="qn_table" class="table table-striped">
+<tr class="row">
+<th>S.no</th><th>Judge</th><th>scores</th>
+</tr>
+{% for readout, ans,qn in qndata %}
+{%if ans.link.seq == 1%}
+<tr><td></td><td>Date:{{readout.start}}</td><td></td></tr>
+{%endif%}
+<tr key="{{ans.id}}" class="row projectdata" qntype="{{qn.type}}">
+{% if qn.type == "yesno" %}
+<td>{{forloop.counter}}.</td><td>{{ans.user.username}}</td>
+<td>{{qn.qn}}<br>
+<b>Score: {% if ans.ansint == 1 %}yes{% else %}no{% endif %}</b>
+</td>
+{% elif qn.type == "range" %}
+<td>{{forloop.counter}}.</td><td>{{ans.user.username}}</td>
+<td>{{qn.qn}}<br>
+<b>Score: {{ans.ansint}}/5</b>
+</td>
+{% elif qn.type == "rangecomment" %}
+<td>{{forloop.counter}}.</td><td>{{ans.user.username}}</td>
+<td>{{qn.qn}}<br>
+<b>Score: {{ans.ansint}}/5</b>
+<td>{{qn.subqn}}<br>
+<b>Comment: {{ans.anschar}}</b>
+</td>
+{% endif %}
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

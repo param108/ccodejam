@@ -47,4 +47,7 @@ urlpatterns = [
     url(r'^scorecard/questions/update/(?P<batchid>[0-9]+)/', views.updateScoreCard, name="addScoreQn"),
     url(r'^scorecard/questions/delete/(?P<batchid>[0-9]+)/(?P<scqnid>[0-9]+)/', views.delScoreQn, name="delScoreQn"),
     url(r'^scorecard/questions/edit/(?P<scqnid>[0-9]+)/', views.editScoreQn, name="editScoreQn"),
+    url(r'^scorecard/answers/update/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.updateReportCard, name="updateRecordCard"),
+    url(r'^scorecard/show/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.showScoreCard, name="showScoreCard"),
+    url(r'^reportcard/show/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.showProjectReport, name="showScoreCard"),
 ]

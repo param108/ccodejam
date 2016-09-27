@@ -54,6 +54,8 @@ $(document).ready(function() {
 {% for d in project.nch %}
 {{d.username}}{% if not forloop.last %},{% endif %}
 {% endfor %}
+<br>
+<b><a href="{{base_url}}/projects/reportcard/show/{{batch.id}}/{{project.project.id}}/">Reports</a></b><br>
 {% if project.status == "red" %}
 <br>
 <b> Why is this project red?:</b> {{project.reason}}

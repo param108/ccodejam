@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from models import Batch,Project,Member,Milestone,LineItem,ScoreCard,ReadOut,Judges
+from models import Batch,Project,Member,Milestone,LineItem,ScoreCard,ReadOut,Judges,ScoreCardUser
 from models import ScoreQn,ScoreAns,ScoreCardLink
 from forms import BatchForm,JudgeForm
 from codejam import settings
@@ -21,7 +21,7 @@ def mybatches(request):
   bs = Batch.objects.filter(project__member__user=request.user)
   batchlist=[]
   for batch in bs:
-    routs = ReadOut.objects.filter(batch=bs).filter(isopen=True)
+    routs = ReadOut.objects.filter(batch=batch).filter(isopen=True)
     readoutopen=False
     if len(routs):
       readoutopen=True
@@ -37,7 +37,7 @@ def batches(request):
   bs = Batch.objects.all()
   batchlist =[]
   for batch in bs:
-    routs = ReadOut.objects.filter(batch=bs).filter(isopen=True)
+    routs = ReadOut.objects.filter(batch=batch).filter(isopen=True)
     readoutopen=False
     if len(routs):
       readoutopen=True
@@ -404,7 +404,14 @@ def ShowMilestoneStates(request, batchid, projectid):
     lineitems = LineItem.objects.filter(milestone = milestone).order_by('seq')
     itemlist.append((milestone,lineitems))
 
-  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project,
+  judgelist = Judges.objects.filter(batch=batch).filter(username=request.user.username)
+  isjudge=False
+  if len(judgelist):
+    routs = ReadOut.objects.filter(batch = batch).filter(isopen=True)
+    if (len(routs)):
+      isjudge=True
+
+  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project, "isjudge": isjudge,
   'batch': batch})
 
 @login_required(login_url=(settings.BASE_URL+'/login/'))
@@ -428,13 +435,20 @@ def addMilestones(request, batchid, projectid):
   if canEdit(request.user, batch, project):
     role = "edit"
 
+  judgelist = Judges.objects.filter(batch=batch).filter(username=request.user.username)
+  isjudge=False
+  if len(judgelist):
+    routs = ReadOut.objects.filter(batch = batch).filter(isopen=True)
+    if (len(routs)):
+      print "isjudge=True"
+      isjudge=True
   itemlist=[]
   milestones = firstlogin(project)
   for milestone in milestones:
     lineitems = LineItem.objects.filter(milestone = milestone).order_by('seq')
     itemlist.append((milestone,lineitems))
 
-  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project,
+  return render(request, "projects/addMilestones.html",{'base_url': settings.BASE_URL, 'ls':itemlist,'role': role, 'project': project, 'isjudge': isjudge,
   'batch': batch})
 @csrf_exempt
 @login_required(login_url=(settings.BASE_URL+'/login/'))
@@ -665,22 +679,12 @@ def delScoreQn(request, batchid, scqnid):
 def editScoreQn(request, scqnid):
   pass
 
-def createAnswerCard(scorecardid, user):
-  try:
-    scorecard = ScoreCard.objects.get(pk=scorecardid)
-  except:
-    return False
-  with(user, "createscorecard") as lock: 
-    ScoreAns.objects.filter(user = user).filter(link_scorecard = scorecard)
-    if len(ScoreAns):
-      return True
-
-    for link in  ScoreCardLink.object.filter(scorecard = scorecard).order_by("seq"):
-      # if a link exists break
-      ans = ScoreAns(user = user, link=link)
-      ans.save()
-    return True
-  return False
+def createAnswerCard(scorecard, user):
+  for link in  ScoreCardLink.objects.filter(scorecard = scorecard).order_by("seq"):
+    # if a link exists break
+    ans = ScoreAns(user = user, link=link)
+    ans.save()
+  return True
     
 def generateyesno(ans):
   i = '<div id="ans_%d" class="scorecard-input"><label>%s <input type="checkbox"/></label></div>'%(ans.id, ans.link.qn.qn)
@@ -711,7 +715,7 @@ def create_readout(request, batchid):
   #check if one already exists that is open.
   batch = Batch.objects.get(pk=int(batchid)) 
   with Lock(request.user,"createreadout") as lock:
-    routs = ReadOut.objects.filter(batch_id = batchid).filter(isopen=True)
+    routs = ReadOut.objects.filter(batch = batch).filter(isopen=True)
     if len(routs):
       return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
     rout =  ReadOut(batch=batch)
@@ -840,3 +844,100 @@ def delJudge(request,batchid, judgeid):
   judge.delete()  
   return HttpResponseRedirect(settings.BASE_URL+"/projects/judge/add/"+str(batchid)+"/")
 
+# now the view to see and update the scorecard
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+def showScoreCard(request,batchid, projectid):
+  # first check if user is judge
+  batch = Batch.objects.get(pk=batchid)
+  if not len(Judges.objects.filter(username=request.user.username).filter(batch=batch)):
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/my/")
+  routs = ReadOut.objects.filter(batch = batch).filter(isopen=True)
+  if not len(routs):
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/my/")
+  project=Project.objects.get(pk=projectid)
+  user = request.user
+  scorecard = ScoreCard.objects.get(batch=batch)
+  scu = None
+  with Lock(request.user,"createjudgescard") as lock:
+    scus = ScoreCardUser.objects.filter(readout=routs[0]).filter(project=project).filter(user=user).filter(scorecard=scorecard)
+    if not len(scus):
+      scu = ScoreCardUser(readout=routs[0], project=project, user=user,scorecard=scorecard)
+      scu.save()
+      createAnswerCard(scorecard, user)
+  links = ScoreCardLink.objects.filter(scorecard=scorecard)
+  anss = ScoreAns.objects.filter(user=user).filter(link__scorecard = scorecard).order_by("link__seq") 
+  qns =[ (ans, ans.link.qn) for ans in anss ]
+  print qns
+  return render(request, "projects/reportcard.html",{"project":project,
+                                              "base_url": settings.BASE_URL,
+                                              "batch": batch,
+                                              "user": user,
+                                              "qndata": qns})
+                                              
+@csrf_exempt
+@login_required(login_url=(settings.BASE_URL+'/login/'))
+def updateReportCard(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return JsonResponse({"status": 0});
+  if not len(Judges.objects.filter(username=request.user.username).filter(batch=batch)):
+    return JsonResponse({"status": -1});
+  routs = ReadOut.objects.filter(batch = batch).filter(isopen=True)
+  if not len(routs):
+    return JsonResponse({"status": -1});
+  if request.method == "POST":
+    anss = json.loads(request.body)
+    for ans in anss['lineitems']:
+      if ans["id"] != "-1":
+        id = int(ans["id"])
+        try:
+          anso = ScoreAns.objects.get(pk=id) 
+          if request.user != anso.user:
+            print "wrong user"
+            return JsonResponse({"status": -1});
+             
+          if ans["qntype"] == "yesno":
+            anso.ansint = int (ans["ansint"])
+          elif ans["qntype"] == "range":
+            anso.ansint = int (ans["ansint"])
+          elif ans["qntype"] == "rangecomment":
+            anso.ansint = int (ans["ansint"])
+            anso.anschar = ans["anschar"]
+          anso.save()
+        except Exception,e:
+          print ("Failed to save new qn"+str(e))
+          return JsonResponse({"status": -1});
+    return JsonResponse({"status": 0});
+
+def showProjectReport(request, batchid, projectid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/my/")
+  project = None
+  try:
+    project = Project.objects.get(pk=projectid)
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(brach.id)+"/")
+
+  routs = ReadOut.objects.filter(batch = batch)
+  if len(routs) == 0:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(batch.id)+"/")
+  qndata=[] 
+  for rout in routs:
+    scus = ScoreCardUser.objects.filter(readout=rout)
+    for scu in scus:
+      anss = ScoreAns.objects.filter(link__scorecard = scu.scorecard).order_by("link__seq") 
+      for ans in anss:
+        qndata.append((rout, ans, ans.link.qn))
+  return render(request, "projects/viewreport.html", {"batch":batch,
+                                                "project": project,
+                                                "qndata":qndata,
+                                                "base_url": settings.BASE_URL})
+                                                      

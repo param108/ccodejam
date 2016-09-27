@@ -158,11 +158,12 @@ console.log(save_status);
 <tr class="row">
 <th>S.No</th><th>Details</th><th>Status</th><th>Actions</th>
 {%if role == "edit" %}
-<th><a class="btn btn-info" onClick="return onAdd('{{m.id}}');">Add Line</a> <a class="btn btn-success" onClick="return onSave();">Save</a></th>
+<th><a class="btn btn-info" onClick="return onAdd('{{m.id}}');">Add Line</a> <a class="btn btn-success" onClick="return onSave();">Save</a> 
+{% if isjudge %} <a class="btn btn-primary" href="{{base_url}}/projects/scorecard/show/{{batch.id}}/{{project.id}}/">Score</a>{% endif %}</th>
 {%elif role == "status" %}
-<th><a class="btn btn-success" onClick="return onSave();">Save</a></th>
+<th><a class="btn btn-success" onClick="return onSave();">Save</a> {% if isjudge %} <a class="btn btn-primary" href="{{base_url}}/projects/scorecard/show/{{batch.id}}/{{project.id}}/">Score</a>{% endif %}</th>
 {% else %}
-<th></th>
+<th>{% if isjudge %} <a class="btn btn-primary" href="{{base_url}}/projects/scorecard/show/{{batch.id}}/{{project.id}}/">Score</a>{% endif %}</th>
 {% endif %}
 </tr>
 {% for line in l %}
