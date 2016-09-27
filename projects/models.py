@@ -72,6 +72,7 @@ class ScoreCardLink(models.Model):
   seq = models.IntegerField()
 
 class ScoreAns(models.Model):
+  scorecarduser = models.ForeignKey(ScoreCardUser,null=True)
   user = models.ForeignKey(User)
   link = models.ForeignKey(ScoreCardLink)
   ansint = models.IntegerField(null=True)

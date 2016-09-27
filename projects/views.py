@@ -679,10 +679,10 @@ def delScoreQn(request, batchid, scqnid):
 def editScoreQn(request, scqnid):
   pass
 
-def createAnswerCard(scorecard, user):
+def createAnswerCard(scorecard, user, scu):
   for link in  ScoreCardLink.objects.filter(scorecard = scorecard).order_by("seq"):
     # if a link exists break
-    ans = ScoreAns(user = user, link=link)
+    ans = ScoreAns(user = user, link=link, scorecarduser=scu)
     ans.save()
   return True
     
@@ -863,9 +863,11 @@ def showScoreCard(request,batchid, projectid):
     if not len(scus):
       scu = ScoreCardUser(readout=routs[0], project=project, user=user,scorecard=scorecard)
       scu.save()
-      createAnswerCard(scorecard, user)
+      createAnswerCard(scorecard, user,scu)
+    else:
+      scu = scus[0]
   links = ScoreCardLink.objects.filter(scorecard=scorecard)
-  anss = ScoreAns.objects.filter(user=user).filter(link__scorecard = scorecard).order_by("link__seq") 
+  anss = ScoreAns.objects.filter(user=user).filter(scorecarduser = scu).order_by("link__seq") 
   qns =[ (ans, ans.link.qn) for ans in anss ]
   print qns
   return render(request, "projects/reportcard.html",{"project":project,
@@ -933,7 +935,7 @@ def showProjectReport(request, batchid, projectid):
   for rout in routs:
     scus = ScoreCardUser.objects.filter(readout=rout)
     for scu in scus:
-      anss = ScoreAns.objects.filter(link__scorecard = scu.scorecard).order_by("link__seq") 
+      anss = ScoreAns.objects.filter(scorecarduser = scu).order_by("link__seq") 
       for ans in anss:
         qndata.append((rout, ans, ans.link.qn))
   return render(request, "projects/viewreport.html", {"batch":batch,
