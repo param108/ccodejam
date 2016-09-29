@@ -8,6 +8,14 @@
 #saved_comment{
 color: red;
 }
+
+.danger-state {
+background-color: #F75D59;
+}
+.perfect-state {
+background-color: #6AFB92;
+}
+
 </style> 
 <script type="text/javascript">
 var saving=false;
@@ -109,7 +117,7 @@ console.log(save_status);
 <div id="saved_comment"></div>
 <div class="batch-list">
 <h3><b>Questions for Readout</b></h3>
-<table id="qn_table" class="table table-striped">
+<table id="qn_table" class="table">
 <tr class="row">
 <th>S.no</th><th>Judge</th><th>scores</th>
 </tr>
@@ -117,26 +125,47 @@ console.log(save_status);
 {%if ans.link.seq == 1%}
 <tr><td></td><td>Date:{{readout.start}}</td><td></td></tr>
 {%endif%}
-<tr key="{{ans.id}}" class="row projectdata" qntype="{{qn.type}}">
 {% if qn.type == "yesno" %}
+{% if ans.ansint == 1 %}
+<tr key="{{ans.id}}" class="row projectdata perfect-state" qntype="{{qn.type}}">
+{% else %}
+<tr key="{{ans.id}}" class="row projectdata danger-state" qntype="{{qn.type}}">
+{% endif %}
 <td>{{forloop.counter}}.</td><td>{{ans.user.username}}</td>
 <td>{{qn.qn}}<br>
 <b>Score: {% if ans.ansint == 1 %}yes{% else %}no{% endif %}</b>
 </td>
+</tr>
 {% elif qn.type == "range" %}
+{%if ans.ansint == 5 %}
+<tr key="{{ans.id}}" class="row projectdata perfect-state" qntype="{{qn.type}}">
+{%elif ans.ansint < 3 %}
+<tr key="{{ans.id}}" class="row projectdata danger-state" qntype="{{qn.type}}">
+{%else%}
+<tr key="{{ans.id}}" class="row projectdata" qntype="{{qn.type}}">
+{%endif%}
 <td>{{forloop.counter}}.</td><td>{{ans.user.username}}</td>
 <td>{{qn.qn}}<br>
 <b>Score: {{ans.ansint}}/5</b>
 </td>
+</tr>
 {% elif qn.type == "rangecomment" %}
+{%if ans.ansint == 5 %}
+<tr key="{{ans.id}}" class="row projectdata perfect-state" qntype="{{qn.type}}">
+{%elif ans.ansint < 3 %}
+<tr key="{{ans.id}}" class="row projectdata danger-state" qntype="{{qn.type}}">
+{%else%}
+<tr key="{{ans.id}}" class="row projectdata" qntype="{{qn.type}}">
+{%endif%}
+
 <td>{{forloop.counter}}.</td><td>{{ans.user.username}}</td>
 <td>{{qn.qn}}<br>
 <b>Score: {{ans.ansint}}/5</b>
 <td>{{qn.subqn}}<br>
 <b>Comment: {{ans.anschar}}</b>
 </td>
-{% endif %}
 </tr>
+{% endif %}
 {% endfor %}
 </table>
 </div>
