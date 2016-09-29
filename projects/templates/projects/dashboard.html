@@ -60,7 +60,7 @@ ScoreBoards: {% for readout in readouts %}<a class="btn btn-info" href="{{base_u
 <br>
 <b><a href="{{base_url}}/projects/reportcard/show/{{batch.id}}/{{project.project.id}}/">Reports</a></b><br>
 {% if printscores %}
-<b>Score: {{projects.totalscore}}/{{projects.maxscore}}</b> 
+<b>Score: {{project.totalscore}}/{{project.maxscore}}</b> 
 {% endif %}
 {% if project.status == "red" %}
 <br>
