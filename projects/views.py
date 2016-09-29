@@ -933,7 +933,7 @@ def showProjectReport(request, batchid, projectid):
     return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(batch.id)+"/")
   qndata=[] 
   for rout in routs:
-    scus = ScoreCardUser.objects.filter(readout=rout)
+    scus = ScoreCardUser.objects.filter(readout=rout).filter(project=project)
     for scu in scus:
       anss = ScoreAns.objects.filter(scorecarduser = scu).order_by("link__seq") 
       for ans in anss:

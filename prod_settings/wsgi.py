@@ -9,12 +9,12 @@ https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/
 
 import os
 import sys
+sys.path.append('/var/lib/codejam/usr/lib/python2.7/site-packages')
 from django.core.wsgi import get_wsgi_application
 import datetime, time
 
 os.environ['PYTHON_EGG_CACHE'] = '/var/lib/codejam/python-eggs'
 sys.path.append('/sw/packages/python/2.7.10/lib/python2.7/site-packages/')
-sys.path.append('/var/lib/codejam/usr/lib/python2.7/site-packages')
 sys.path.append('/var/lib/codejam/codejam')
 sys.path.append('/var/lib/codejam/codejam/codejam')
 
