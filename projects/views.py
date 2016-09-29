@@ -977,9 +977,9 @@ def showProjectReport(request, batchid, projectid):
       if not verify_score(anss):
         continue
       numjudges+=1
+      maxscore, totalscore = calc_score(anss)
+      finaltotalscore += totalscore
       for ans in anss:
-        maxscore, totalscore = calc_score(anss)
-        finaltotalscore += totalscore
         qndata.append((rout, ans, ans.link.qn, totalscore, maxscore))
     if numjudges > 0:
       finaltotalscore = int(finaltotalscore/numjudges)
