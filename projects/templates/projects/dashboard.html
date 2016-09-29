@@ -32,6 +32,9 @@ $(document).ready(function() {
 <h2 class="form-signin-heading header">CodeJam Projects Batch</h2>
 </div>
 <h3>Projects</h3>
+{% if readouts %}
+ScoreBoards: {% for readout in readouts %}<a class="btn btn-info" href="{{base_url}}/projects/scoreboard/show/{{batch.id}}/{{readout.id}}/">ReadOut {{forloop.counter}}</a> {% endfor %}
+{% endif %}
 <div class="batch-list">
 {% for project in projects %}
 <div class="project-container">

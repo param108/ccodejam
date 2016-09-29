@@ -50,4 +50,5 @@ urlpatterns = [
     url(r'^scorecard/answers/update/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.updateReportCard, name="updateRecordCard"),
     url(r'^scorecard/show/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.showScoreCard, name="showScoreCard"),
     url(r'^reportcard/show/(?P<batchid>[0-9]+)/(?P<projectid>[0-9]+)/', views.showProjectReport, name="showScoreCard"),
+    url(r'^scoreboard/show/(?P<batchid>[0-9]+)/(?P<readoutid>[0-9]+)/', views.projectScoreBoard, name="showScoreCard"),
 ]

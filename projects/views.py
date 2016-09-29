@@ -623,11 +623,13 @@ class ProjectData:
       if member.role=="Mentor":
         self.mentors.append(member) 
 
-  def __init__(self, project):
+  def __init__(self, project,maxscore=0,totalscore=0):
     self.project=project
     self.members=Member.objects.filter(project=project)
     self.getRoles()
     self.milestones=[] 
+    self.maxscore = maxscore
+    self.totalscore = totalscore
     nummilestones = 0
     for milestone in Milestone.objects.filter(project=project):
       mobj = MilestoneData(milestone, LineItem.objects.filter(milestone = milestone).order_by("seq"))
@@ -653,8 +655,52 @@ def dashboard(request, batchid):
   for project in projects:
     pd = ProjectData(project) 
     projectdatas.append(pd)
+  readouts = ReadOut.objects.filter(batch_id = int(batchid)).order_by("start")
   return render(request, "projects/dashboard.html", { 'projects': projectdatas,
- 'base_url': settings.BASE_URL, 'batch': batch })
+ 'base_url': settings.BASE_URL, 'batch': batch , 'readouts':readouts})
+
+# no login required to view
+def projectScoreBoard(request, batchid, readoutid):
+  batch = None
+  try:
+    batch = Batch.objects.get(pk=int(batchid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  readout = None
+  try:
+    readout = ReadOut.objects.get(pk=int(readoutid))
+  except:
+    # try to screw with me I silently return ok without doing shit.
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+  
+  if not batch.showdashboard:
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
+
+  projects = Project.objects.filter(batch_id=int(batchid)).order_by("title")
+  projectdatas=[]
+  for project in projects:
+    numjudges = 0
+    maxscore = 0
+    finaltotalscore = 0
+    scus = ScoreCardUser.objects.filter(readout=rout).filter(project=project)
+    for scu in scus:
+      anss = ScoreAns.objects.filter(scorecarduser = scu).order_by("link__seq") 
+      if not verify_score(anss):
+        continue
+      numjudges+=1
+      maxscore, totalscore = calc_score(anss)
+      finaltotalscore += totalscore
+    if numjudges > 0:
+      finaltotalscore = int(finaltotalscore/numjudges)
+    else:
+      finaltotalscore = 0
+    pd = ProjectData(project,finaltotalscore, maxscore) 
+    projectdatas.append(pd)
+    projectdatas= sorted(projectdatas, key=lambda x:x.totalscore, reverse=True)
+  return render(request, "projects/dashboard.html", { 'projects': projectdatas,
+ 'base_url': settings.BASE_URL, 'batch': batch 'readouts':[]})
 
 def createScore(request,batchid):
   pass
