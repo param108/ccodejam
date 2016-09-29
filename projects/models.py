@@ -64,6 +64,7 @@ class ScoreQn(models.Model):
   qn = models.CharField(max_length=200, unique=True)
   subqn = models.CharField(max_length=200, default="")
   type = models.CharField(max_length=20)
+  weight = models.IntegerField(default=1)
 
 class ScoreCardLink(models.Model):
   # added nullable for migration

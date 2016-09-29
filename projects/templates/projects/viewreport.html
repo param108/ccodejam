@@ -115,14 +115,18 @@ console.log(save_status);
 <h3>Project: {{project.title}}</h3>
 <div id="saved_comment"></div>
 <div class="batch-list">
+<h3>Scores:</h3>
+{% for total,max in totalscores %}
+Readout {{forloop.counter}}: <b>{{total}}/{{max}}</b><br>
+{% endfor %}
 <h3><b>Questions for Readout</b></h3>
 <table id="qn_table" class="table">
 <tr class="row">
 <th>S.no</th><th>Judge</th><th>scores</th>
 </tr>
-{% for readout, ans,qn in qndata %}
+{% for readout, ans,qn,tot,m in qndata %}
 {%if ans.link.seq == 1%}
-<tr><td></td><td>Date:{{readout.start}}</td><td></td></tr>
+<tr><td cols=1></td><td>Date:{{readout.start}}</td><td>Partialscore:{{tot}}/{{m}}</td></tr>
 {%endif%}
 {% if qn.type == "yesno" %}
 {% if ans.ansint == 1 %}

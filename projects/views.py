@@ -788,6 +788,7 @@ def updateScoreCard(request, batchid):
           qno.qn = qn["qn"]
           qno.subqn = qn["subqn"]
           qno.type = qn["type"]
+          qno.weight = int(qn["weight"])
           qno.save()
         except Exception,e:
           print ("Failed to save new qn"+str(e))
@@ -801,7 +802,7 @@ def updateScoreCard(request, batchid):
           print ("Failed to save sclink"+str(e))
           return JsonResponse({"status": -1});
       else:
-        qno = ScoreQn(qn=qn["qn"],subqn=qn["subqn"], type=qn["type"])
+        qno = ScoreQn(qn=qn["qn"],subqn=qn["subqn"], type=qn["type"], weight=qn["weight"])
         qno.save()
         sclink = ScoreCardLink(qn=qno, seq=qn["seq"], scorecard=scorecard)
         try:
@@ -914,6 +915,39 @@ def updateReportCard(request, batchid, projectid):
           return JsonResponse({"status": -1});
     return JsonResponse({"status": 0});
 
+# A judging is valid if all numbers are correctly updated.
+def verify_score(anss):
+  for ans in anss:
+    if ans.link.qn.type == "yesno":
+      if ans.ansint == None:
+        return False
+    elif ans.link.qn.type== "range":
+      if ans.ansint == None:
+        return False
+    elif ans.link.qn.type== "rangecomment":
+      if ans.ansint == None:
+        return False
+  return  True
+
+def calc_score(anss):
+  maxscore=0
+  totalscore=0
+  for ans in anss:
+    maxscore+= (5*ans.link.qn.weight)
+    thisscore = 0
+    if ans.link.qn.type == "yesno":
+      if ans.ansint == 1:
+        thisscore=5 
+      else:
+        thisscore=0 
+    elif ans.link.qn.type== "range":
+      thisscore = ans.ansint
+    elif ans.link.qn.type== "rangecomment":
+      thisscore = ans.ansint
+    totalscore += (thisscore*ans.link.qn.weight)
+  return  maxscore, totalscore
+
+
 def showProjectReport(request, batchid, projectid):
   batch = None
   try:
@@ -932,14 +966,30 @@ def showProjectReport(request, batchid, projectid):
   if len(routs) == 0:
     return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(batch.id)+"/")
   qndata=[] 
+  finaltotalscore = 0
+  maxscore = 0
+  numjudges = 0
+  readoutscores=[]
   for rout in routs:
     scus = ScoreCardUser.objects.filter(readout=rout).filter(project=project)
     for scu in scus:
       anss = ScoreAns.objects.filter(scorecarduser = scu).order_by("link__seq") 
+      if not verify_score(anss):
+        continue
+      numjudges+=1
       for ans in anss:
-        qndata.append((rout, ans, ans.link.qn))
+        maxscore, totalscore = calc_score(anss)
+        finaltotalscore += totalscore
+        qndata.append((rout, ans, ans.link.qn, totalscore, maxscore))
+    if numjudges > 0:
+      finaltotalscore = int(finaltotalscore/numjudges)
+    else:
+      finaltotalscore = 0
+    readoutscores.append((finaltotalscore, maxscore))
   return render(request, "projects/viewreport.html", {"batch":batch,
                                                 "project": project,
                                                 "qndata":qndata,
-                                                "base_url": settings.BASE_URL})
+                                                "base_url": settings.BASE_URL,
+                                                "totalscores":readoutscores}
+                                                )
                                                       

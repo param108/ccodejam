@@ -62,12 +62,13 @@ function onSave() {
     subobj.seq = $(itm).children("td:first-child").text();
     subobj.qn = $(itm).find(".project-title").val();
     subobj.subqn = $(itm).find(".project-subqn").val();
+    subobj.weight = $(itm).find(".project-weight").val();
     if (subobj.qn.length == 0) {
       alert("lineitems cannot be empty");
       valid = false;
       return false;
     }
-    subobj.type = $(itm).find("select").val();
+    subobj.type = $(itm).find(".project-type").val();
     obj.lineitems.push(subobj);
   });   
   if (! valid) {
@@ -116,7 +117,8 @@ function onAdd() {
   t = $(key);
   var rowCount = $(key+' tr').length;
   t.append('<tr key="-1" id="proj_'+idxcount+'" class="projectdata row">'+'<td>'+rowCount+'</td><td><input class="project-title" type="text" placeholder="Question"/><br><input class="project-subqn" type="text" placeholder="Sub-question (if reqd)"/></td>'+
-'<td><select class="statusdropdown"> <option selected  value="yesno">Yes/No</option><option value="range">Range(0-5)</option><option selected value="rangecomment">Range With Comment</option></select></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
+'<td><select class="project-type"> <option selected  value="yesno">Yes/No</option><option value="range">Range(0-5)</option><option selected value="rangecomment">Range With Comment</option></select></td>'+
+'<td><select class="project-weight"><option selected value="1">1</option><option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5</option></select></td><td><a class="btn btn-danger" onClick="return onDel(\'proj_'+idxcount+'\');">Delete</a></td></tr>');
   $("#proj_"+idxcount).keypress(onchange);
   idxcount++;
   save_status = "Unsaved";
@@ -142,18 +144,25 @@ console.log(save_status);
 <h3><b>Questions for Readout</b></h3>
 <table id="qn_table" class="table table-striped">
 <tr class="row">
-<th>S.No</th><th>Question</th><th>Type</th><th>Actions</th>
+<th>S.No</th><th>Question</th><th>Type</th><th>Weightage</th><th>Actions</th>
 <th><a class="btn btn-info" onClick="return onAdd();">Add Line</a> <a class="btn btn-success" onClick="return onSave();">Save</a></th>
 </tr>
 {% for qn in scs %}
 <tr key="{{qn.qn.id}}" class="row projectdata">
 <td>{{forloop.counter}}</td>
 <td><input class="project-title" type="text" value="{{qn.qn.qn}}" placeholder="Add details"/><br><input class="project-subqn" type="text" value="{{qn.qn.subqn}}" placeholder="Sub-question (if reqd)"/></td>
-<td><select class="statusdropdown"> 
+<td><select class="project-type"> 
 <option {% if qn.qn.type == "yesno" %} selected {% endif %}  value="yesno">Yes/No</option>
 <option {% if qn.qn.type == "range" %} selected {% endif %} value="range">Range(0-5)</option>
 <option {% if qn.qn.type == "rangecomment" %} selected {% endif %} value="rangecomment">Range With Comment</option>
 </select></td>
+<td><select class="project-weight"> 
+<option {% if qn.qn.weight == 1 %} selected {% endif %}  value="1">1</option>
+<option {% if qn.qn.weight == 2 %} selected {% endif %}  value="2">2</option>
+<option {% if qn.qn.weight == 3 %} selected {% endif %}  value="3">3</option>
+<option {% if qn.qn.weight == 4 %} selected {% endif %}  value="4">4</option>
+<option {% if qn.qn.weight == 5 %} selected {% endif %}  value="5">5</option>
+</td>
 <td><a class="btn btn-danger" onClick="return checkSaved();" href="{{base_url}}/projects/scorecard/questions/delete/{{batch.id}}/{{qn.qn.id}}/">Delete</a></td>
 </tr>
 {% endfor %}
