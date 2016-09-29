@@ -657,7 +657,7 @@ def dashboard(request, batchid):
     projectdatas.append(pd)
   readouts = ReadOut.objects.filter(batch_id = int(batchid)).order_by("start")
   return render(request, "projects/dashboard.html", { 'projects': projectdatas,
- 'base_url': settings.BASE_URL, 'batch': batch , 'readouts':readouts})
+ 'base_url': settings.BASE_URL, 'batch': batch , 'readouts':readouts,'printscores':False})
 
 # no login required to view
 def projectScoreBoard(request, batchid, readoutid):
@@ -700,7 +700,7 @@ def projectScoreBoard(request, batchid, readoutid):
     projectdatas.append(pd)
   projectdatas= sorted(projectdatas, key=lambda x:x.totalscore, reverse=True)
   return render(request, "projects/dashboard.html", { 'projects': projectdatas,
- 'base_url': settings.BASE_URL, 'batch': batch, 'readouts':[]})
+ 'base_url': settings.BASE_URL, 'batch': batch, 'readouts':[], 'printscores'=True})
 
 def createScore(request,batchid):
   pass
