@@ -623,7 +623,7 @@ class ProjectData:
       if member.role=="Mentor":
         self.mentors.append(member) 
 
-  def __init__(self, project,maxscore=0,totalscore=0):
+  def __init__(self, project,totalscore=0,maxscore=0):
     self.project=project
     self.members=Member.objects.filter(project=project)
     self.getRoles()
@@ -684,7 +684,7 @@ def projectScoreBoard(request, batchid, readoutid):
     numjudges = 0
     maxscore = 0
     finaltotalscore = 0
-    scus = ScoreCardUser.objects.filter(readout=rout).filter(project=project)
+    scus = ScoreCardUser.objects.filter(readout=readout).filter(project=project)
     for scu in scus:
       anss = ScoreAns.objects.filter(scorecarduser = scu).order_by("link__seq") 
       if not verify_score(anss):
@@ -698,9 +698,9 @@ def projectScoreBoard(request, batchid, readoutid):
       finaltotalscore = 0
     pd = ProjectData(project,finaltotalscore, maxscore) 
     projectdatas.append(pd)
-    projectdatas= sorted(projectdatas, key=lambda x:x.totalscore, reverse=True)
+  projectdatas= sorted(projectdatas, key=lambda x:x.totalscore, reverse=True)
   return render(request, "projects/dashboard.html", { 'projects': projectdatas,
- 'base_url': settings.BASE_URL, 'batch': batch 'readouts':[]})
+ 'base_url': settings.BASE_URL, 'batch': batch, 'readouts':[]})
 
 def createScore(request,batchid):
   pass
