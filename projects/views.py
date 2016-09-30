@@ -674,7 +674,7 @@ def projectScoreBoard(request, batchid, readoutid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
-  if not batch.scoreboardopen:
+  if (not batch.scoreboardopen) and (not request.user.is_superuser):
     return render(request, "projects/notFound.html",{})  
 
   readout = None
@@ -1011,7 +1011,7 @@ def showProjectReport(request, batchid, projectid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/my/")
   project = None
-  if not batch.scoreboardopen:
+  if (not batch.scoreboardopen) and (not request.user.is_superuser):
     return render(request, "projects/notFound.html",{})  
   try:
     project = Project.objects.get(pk=projectid)
