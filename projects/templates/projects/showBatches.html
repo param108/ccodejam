@@ -27,8 +27,11 @@ function confirmdelete() {
 <th>First Readout</th>
 <th>Number of Readouts</th>
 <th>Period (weeks)</th>
+{%if superuser %}
 <th>Editable</th>
 <th>Dashboard Visibility</th>
+<th>Scoreboard Visibility</th>
+{%endif%}
 <th>Actions</th>
 </tr>
 {% for a,readoutopen in batchlist %}
@@ -37,8 +40,11 @@ function confirmdelete() {
 <td>{{a.start}}</td>
 <td>{{a.numreadouts}}</td>
 <td>{{a.interval}}</td>
+{%if superuser %}
 <td>{{a.inputopen}}</td>
 <td>{{a.showdashboard}}</td>
+<td>{{a.scoreboardopen}}</td>
+{%endif%}
 {% if superuser %}
 <td><a class="btn btn-primary" href="{{base_url}}/projects/batch/edit/{{a.id}}/">Edit</a> <a class="btn btn-primary" href="{{base_url}}/projects/my/{{a.id}}/">My Projects</a> <a class="btn btn-success" href="{{base_url}}/projects/add/{{a.id}}/">Add/Edit Projects</a> 
 <a class="btn btn-success" href="{{base_url}}/projects/scorecard/create/{{a.id}}/">Add/Edit ScoreCard</a> 

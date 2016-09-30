@@ -8,6 +8,8 @@ class BatchForm(forms.Form):
   interval = forms.IntegerField(label="Number of weeks between readouts")
   inputopen = forms.BooleanField(required = False, label="Can mentors still input project milestones?")
   showdashboard= forms.BooleanField(required = False, label="Can mentors see the dashboard?")
+  scoreboardopen=forms.BooleanField(required = False, label="Can mentors see the scoreboard?")
+
 
 
 class ProjectForm(forms.Form):

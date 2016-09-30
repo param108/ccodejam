@@ -52,6 +52,13 @@ $(document).ready(function() {
     <label for="{{ form.showdashboard.id_for_label }}">Is the dashboard visible?</label>
     {{ form.showdashboard}}
 </div>
+<div class="checkBoxWrapper">
+    {{ form.scoreboardopen.errors }}
+    <label for="{{ form.scoreboardopen.id_for_label }}">Is the scoreboard visible?</label>
+    {{ form.scoreboardopen}}
+</div>
+
+
 <input class="btn btn-info" type="submit" value="Save"/>
 </form>
 </div>

@@ -77,6 +77,11 @@ def _addBatch(request, initform, initbatch, url):
         batch.showdashboard= form.cleaned_data["showdashboard"]
       else:
         batch.showdashboard=False
+      if "scoreboardopen" in form.cleaned_data:
+        batch.scoreboardopen= form.cleaned_data["scoreboardopen"]
+      else:
+        batch.scoreboardopen=False
+ 
       try:
         batch.save()
         return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
@@ -107,7 +112,8 @@ def editBatch(request, batchid):
                               "start":batch.start,
                               "interval" : batch.interval,
                               "inputopen" : batch.inputopen,
-                              "showdashboard": batch.showdashboard})
+                              "showdashboard": batch.showdashboard,
+                              "scoreboardopen": batch.scoreboardopen})
   return _addBatch(request, form, batch, settings.BASE_URL+"/projects/batch/edit/"+str(batchid)+"/")
 
 @csrf_exempt
@@ -1002,6 +1008,8 @@ def showProjectReport(request, batchid, projectid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/my/")
   project = None
+  if not batch.scoreboardopen:
+    return render(request, "projects/notFound.html",{})  
   try:
     project = Project.objects.get(pk=projectid)
   except:
@@ -1017,6 +1025,7 @@ def showProjectReport(request, batchid, projectid):
   numjudges = 0
   readoutscores=[]
   for rout in routs:
+    numjudges=0
     scus = ScoreCardUser.objects.filter(readout=rout).filter(project=project)
     for scu in scus:
       anss = ScoreAns.objects.filter(scorecarduser = scu).order_by("link__seq") 

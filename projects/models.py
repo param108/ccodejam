@@ -14,6 +14,7 @@ class Batch(models.Model):
   inputopen=models.BooleanField(default=True)
   showdashboard=models.BooleanField(default=False)
   judgingopen=models.BooleanField(default=False)
+  scoreboardopen=models.BooleanField(default= False)
 
 class ReadOut(models.Model):
   start=models.DateField(auto_now_add=True)
