@@ -674,6 +674,9 @@ def projectScoreBoard(request, batchid, readoutid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
+  if not batch.scoreboardopen:
+    return render(request, "projects/notFound.html",{})  
+
   readout = None
   try:
     readout = ReadOut.objects.get(pk=int(readoutid))
