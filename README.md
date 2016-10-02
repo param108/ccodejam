@@ -15,7 +15,7 @@ The onboarding consists of
 The web app consists of the following
 
 1. **A testing application**
-  - tests basic coding skills in any language.
+  - tests basic coding skills in any language. (ala google codejam)
   - allows you to upload and create questions.
   - execution of code is done on the clients computer
   - create and schedule tests
