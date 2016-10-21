@@ -187,6 +187,16 @@ def ExecProjMember(project, user):
   print "Not exec member:"+user.username
   return False
 
+def ExecMember(batch, user):
+  members = Member.objects.filter(user=user)
+  for memb in members:
+    if memb.project.batch == batch:
+      if memb.role == "Director" or memb.role == "Mentor":
+        return True
+  print "Not exec member:"+user.username
+  return False
+
+
 def canEditStatus(user, batch, project):
   if batch.showdashboard:
     if user.is_superuser:
@@ -197,6 +207,16 @@ def canEditStatus(user, batch, project):
     if user.is_superuser:
       return True 
   return False
+
+def canViewScorecard(batch, user):
+  if user.is_superuser:
+    return True
+  if batch.scoreboardopen:
+    # only allow Executive members to see the scoreboard
+    if ExecMember(batch, user):
+      return True
+  return False
+
 
 
 def canEdit(user, batch, project):
@@ -674,7 +694,7 @@ def projectScoreBoard(request, batchid, readoutid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/show/")
 
-  if (not batch.scoreboardopen) and (not request.user.is_superuser):
+  if not canViewScorecard(batch, request.user):
     return render(request, "projects/notFound.html",{})  
 
   readout = None
@@ -737,8 +757,9 @@ def editScoreQn(request, scqnid):
 def createAnswerCard(scorecard, user, scu):
   for link in  ScoreCardLink.objects.filter(scorecard = scorecard).order_by("seq"):
     # if a link exists break
-    ans = ScoreAns(user = user, link=link, scorecarduser=scu)
-    ans.save()
+    if len(ScoreAns.objects.filter(user=user).filter(link=link).filter(scorecarduser=scu)) == 0:
+      ans = ScoreAns(user = user, link=link, scorecarduser=scu)
+      ans.save()
   return True
     
 def generateyesno(ans):
@@ -919,9 +940,11 @@ def showScoreCard(request,batchid, projectid):
     if not len(scus):
       scu = ScoreCardUser(readout=routs[0], project=project, user=user,scorecard=scorecard)
       scu.save()
-      createAnswerCard(scorecard, user,scu)
     else:
       scu = scus[0]
+    # moving this outside the if loop to check if we need to add more questions
+    createAnswerCard(scorecard, user,scu)
+  
   links = ScoreCardLink.objects.filter(scorecard=scorecard)
   anss = ScoreAns.objects.filter(user=user).filter(scorecarduser = scu).order_by("link__seq") 
   qns =[ (ans, ans.link.qn) for ans in anss ]
@@ -1003,6 +1026,7 @@ def calc_score(anss):
   return  maxscore, totalscore
 
 
+@login_required(login_url=(settings.BASE_URL+'/login/'))
 def showProjectReport(request, batchid, projectid):
   batch = None
   try:
@@ -1011,14 +1035,13 @@ def showProjectReport(request, batchid, projectid):
     # try to screw with me I silently return ok without doing shit.
     return HttpResponseRedirect(settings.BASE_URL+"/projects/batch/my/")
   project = None
-  if (not batch.scoreboardopen) and (not request.user.is_superuser):
+  if not canViewScorecard(batch, request.user):
     return render(request, "projects/notFound.html",{})  
   try:
     project = Project.objects.get(pk=projectid)
   except:
     # try to screw with me I silently return ok without doing shit.
-    return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(brach.id)+"/")
-
+    return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(batch.id)+"/")
   routs = ReadOut.objects.filter(batch = batch)
   if len(routs) == 0:
     return HttpResponseRedirect(settings.BASE_URL+"/projects/dashboard/"+str(batch.id)+"/")
