@@ -5,6 +5,7 @@ import os,time
 from codejam import settings
 import time,datetime
 from django.utils.timezone import is_naive
+from django.utils.cache import add_never_cache_headers
 from django.core.urlresolvers import reverse
 import pytz
 from django.http import JsonResponse,HttpResponse,HttpResponseRedirect
@@ -224,7 +225,9 @@ def timeremaining(request, testid):
     attempt = TestAttempt.objects.get(pk=int(testid))
   except Exception,e:
     print("Cant Find:"+str(e)) 
-    return  JsonResponse({"status": -1}) 
+    resp = JsonResponse({"status": -1}) 
+    add_never_cache_headers(resp)
+    return resp
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   if check < attempt.testid.end:
     td = attempt.testid.end - check
@@ -234,10 +237,14 @@ def timeremaining(request, testid):
     mins = secs/60
     secs = secs % 60
     timestr="%02d:%02d:%02d"%(hrs, mins, secs)
-    return JsonResponse({"status":0,
+    resp = JsonResponse({"status":0,
                          "time":timestr,
                          "version":attempt.version});
-  return  JsonResponse({"status": -1}) 
+    add_never_cache_headers(resp)
+    return resp
+  resp = JsonResponse({"status": -1}) 
+  add_never_cache_headers(resp)
+  return resp
 
 @login_required(login_url=(settings.BASE_URL+'/login/'))
 def showquestion(request, attemptid, qnid):
@@ -363,14 +370,16 @@ def dnload(request, ansid, size):
     # locked till here
   qnpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"q.txt"
   #ans.qnset.open()
-  dnloadlink = str(ans.testattempt.testid.id)+"_"+str(ans.qn.id)+"_"+ans.qtype
+  dnloadlink = str(request.user.id)+"_"+str(ans.testattempt.testid.id)+"_"+str(ans.qn.id)+"_"+ans.qtype
   if changed:
     try:
       os.remove(settings.MEDIA_ROOT+"/dnload/"+dnloadlink)
     except:
       pass
     os.symlink(qnpath, settings.MEDIA_ROOT+"/dnload/"+dnloadlink)
-  return HttpResponseRedirect(settings.DNLD_URL+"/"+dnloadlink)
+  httpret = HttpResponseRedirect(settings.DNLD_URL+"/"+dnloadlink)
+  add_never_cache_headers(httpret)
+  return httpret
 
 def updateAnsStatus(user, attempt):
   for ans in Answer.objects.filter(testattempt=attempt).filter(result="in-progress"):
@@ -395,15 +404,21 @@ def updateAnsStatus(user, attempt):
 def uploadtime(request, ansid):
   ansidx = int(ansid)
   if ansidx < 0:
-    return  JsonResponse({"status": -1}) 
+    resp = JsonResponse({"status": -1}) 
+    add_never_cache_headers(resp)
+    return resp
   ans = None
   try:
     ans = Answer.objects.get(pk=ansidx)
   except Exception,e:
     print("Cant Find:"+str(e)) 
-    return  JsonResponse({"status": -1}) 
+    resp =   JsonResponse({"status": -1}) 
+    add_never_cache_headers(resp)
+    return resp
   if not ans.endtime:
-    return  JsonResponse({"status": -1}) 
+    resp = JsonResponse({"status": -1}) 
+    add_never_cache_headers(resp)
+    return resp
   
   check = datetime.datetime.now(pytz.timezone(os.environ['TZ']))
   if check < ans.endtime and ans.result == "in-progress":
@@ -412,14 +427,20 @@ def uploadtime(request, ansid):
     mins = totalsecs/60
     secs = totalsecs % 60
     timestr="%02d:%02d"%(mins, secs)
-    return JsonResponse({"status":0,
+    resp = JsonResponse({"status":0,
                          "time":timestr,
                          "attemptnum":ans.attempt,
                          "version":ans.testattempt.version});
+    add_never_cache_headers(resp)
+    return resp
  # timeout code is 2
   if ans.result == "in-progress" or ans.result == "pass":
-    return  JsonResponse({"status": 2}) 
-  return  JsonResponse({"status": -1}) 
+    resp = JsonResponse({"status": 2}) 
+    add_never_cache_headers(resp)
+    return resp
+  resp = JsonResponse({"status": -1}) 
+  add_never_cache_headers(resp)
+  return resp
 
 def check_if_pass(ans):
   solpath=settings.MEDIA_ROOT+"/solutions/"+str(ans.testattempt.testid.id)+"/"+str(ans.qn.id)+"/"+ans.qtype+"/"+str(ans.solnum)+"a.txt"
