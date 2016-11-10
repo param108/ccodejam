@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#id_datetimefield").datetimepicker({ format:'YYYY-MM-DD HH:mm' });
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+.testaction{padding:10px;}
+.STARTED{background-color: orange;}
+.DONE{background-color: green;}
+.AWAITING{background-color: orange;}
+.NOTSTARTED{background-color: red;}
+.ERRORED{background-color: crimson;}
+ul {
+  list-style-type: none;
+}
+li {
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  height:75px;
+  display: table;
+  width:100%;
+}
+li label {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 5px;
+}
+#submit-button {
+  text-align: center;
+}
+table {
+  margin: auto;
+  vertical-align: middle;
+  width: 80%;
+}
+td {
+  text-align: center;
+}
+th {
+  vertical-align: top;
+  text-align: center;
+}
+.teamname {
+  width: 70%;
+}
+
+.teamscore {
+  width: 30%;
+}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Project Voting</h2>
+</div>
+<div>
+<form action="{{base_url}}/audience/vote/" method="POST">
+<a class="btn btn-danger" href="{{base_url}}/audience/view/">Refresh</a>
+<table border=1>
+<tr><th>Team Name</th><th>Score/Total</th></tr>
+{% for x,y,z in flist %}
+<tr><td class="teamname">{{x}}</td><td class="teamscore">{{y}}/{{z}}</td></tr>
+{% endfor %}
+</table>
+</form>
+</div>
+{% endblock %}

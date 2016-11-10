@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block headext %}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "codetests/css/codetests.css" %}">
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#id_datetimefield").datetimepicker({ format:'YYYY-MM-DD HH:mm' });
+});
+</script>
+<style>
+.initiallyHidden{display:none;}
+.testaction{padding:10px;}
+.STARTED{background-color: orange;}
+.DONE{background-color: green;}
+.AWAITING{background-color: orange;}
+.NOTSTARTED{background-color: red;}
+.ERRORED{background-color: crimson;}
+ul {
+  list-style-type: none;
+}
+li {
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  height:75px;
+  display: table;
+  width:100%;
+}
+li label {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 5px;
+}
+#submit-button {
+  text-align: center;
+}
+table {
+  margin: auto;
+  vertical-align: middle;
+}
+th {
+  vertical-align: top;
+}
+.centertext {
+  text-align: center;
+}
+</style> 
+{% endblock %}
+{% block content %}
+<div>
+<h2 class="form-signin-heading header">CodeJam Project Voting</h2>
+</div>
+<div class="centertext">
+<em>{{message}}</em><br>
+<a class="btn btn-primary" href="{{base_url}}/audience/vote/">Click here to Vote</a>
+</div>
+{% endblock %}

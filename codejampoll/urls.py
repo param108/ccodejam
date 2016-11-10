@@ -15,21 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.conf.urls import url, include
-from codejamlogin import views as codejamloginviews
-from codejam import settings
-import os
-os.environ['TZ']="Asia/Kolkata"
-
+from codejampoll import views
 urlpatterns = [
-    url(r'^static/(?P<path>.*)$','django.views.static.serve',{'document_root':settings.STATIC_ROOT}),
-    url(r'^admin/', admin.site.urls),
-    url(r'^go/', include('coding.urls', namespace="go")),
-    url(r'^tests/', include('codetests.urls',namespace="tests")),
-    url(r'^login/', codejamloginviews.login),
-    url(r'^dashboard/',include('dashboard.urls')),
-    url(r'^projects/',include('projects.urls')),
-    url(r'^audience/',include('codejampoll.urls')),
-    url(r'^$', codejamloginviews.login),
-    url(r'^addadmin/$', codejamloginviews.show_admins)
+    url(r'^vote/', views.vote, name="vote"),
+    url(r'^view/', views.view, name="view"),
+    url(r'^cancelled/', views.cancelvote, name="view")
 ]
